@@ -1,3 +1,13 @@
 h1 {
     text-align: center;
 }
+
+img {
+    width: 50%;
+    height: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border-color: darkred;
+    border-width: 5px;
+}
