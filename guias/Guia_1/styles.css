@@ -1,0 +1,41 @@
+body{
+    background-color:#1e1e1e;
+    font-family:Arial;
+    color:white;
+}
+
+.slide{
+    width:80%;
+    margin:auto;
+    text-align:center;
+    padding-top:80px;
+}
+
+.titulo h1{
+    font-size:50px;
+}
+
+.contenido p{
+    font-size:22px;
+}
+
+.imagen img{
+    width:400px;
+}
+
+.navegacion{
+    margin-top:40px;
+}
+
+.boton{
+    background-color:#3a86ff;
+    width:200px;
+    margin:auto;
+    padding:15px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.boton p{
+    font-size:20px;
+}
