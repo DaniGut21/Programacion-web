@@ -1,0 +1,146 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 50%, #000033 100%);
+    color: white;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.contenedor {
+    width: 90%;
+    max-width: 380px;
+    background-color: rgba(20, 20, 35, 0.95);
+    border: 2px solid #00ff88;
+    border-radius: 20px;
+    padding: 50px 35px;
+    box-shadow: 
+        0 0 30px #00ff88,
+        0 0 60px rgba(0, 255, 136, 0.3);
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+/* Líneas decorativas futuristas */
+.linea-futuro {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00ff88, transparent);
+    width: 80%;
+    left: 10%;
+}
+
+.linea-futuro:first-of-type { top: 20px; }
+.linea-futuro:last-of-type  { bottom: 20px; }
+
+/* Logo y texto */
+.logo {
+    font-size: 52px;
+    font-weight: bold;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px #00ff88;
+}
+.logo span {
+    color: #00ff88;
+}
+
+.subtitulo {
+    font-size: 13px;
+    color: #00ffcc;
+    letter-spacing: 4px;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+
+h1 {
+    font-size: 26px;
+    margin: 10px 0 8px;
+    text-shadow: 0 0 10px #00ffcc;
+}
+
+p {
+    color: #a0a0ff;
+    margin-bottom: 35px;
+    font-size: 15px;
+}
+
+/* Inputs */
+input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 22px;
+    background-color: #1a1a2e;
+    border: 2px solid #334455;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    box-shadow: inset 0 0 8px rgba(0, 255, 136, 0.1);
+}
+
+input:focus {
+    border-color: #00ff88;
+    outline: none;
+    box-shadow: 0 0 15px #00ff88;
+}
+
+/* Contenedor de los dos botones */
+.botones-registro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Botón 1: Enviar y regresar */
+.boton-regresar {
+    background-color: #00ff88;
+    color: black;
+    padding: 15px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 0 20px #00ff88;
+    transition: all 0.3s;
+}
+
+.boton-regresar:hover {
+    background-color: #00ffaa;
+    box-shadow: 0 0 30px #00ffcc;
+    transform: scale(1.03);
+}
+
+/* Botón 2: Enviar e ingresar (más brillante) */
+.boton-ingresar {
+    background-color: transparent;
+    color: #00ffcc;
+    padding: 15px;
+    border: 2px solid #00ffcc;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+.boton-ingresar:hover {
+    background-color: rgba(0, 255, 204, 0.1);
+    box-shadow: 0 0 25px #00ffcc;
+    transform: scale(1.03);
+}
+
+/* Pie de página */
+.pie {
+    margin-top: 40px;
+    font-size: 11px;
+    color: #556677;
+}
