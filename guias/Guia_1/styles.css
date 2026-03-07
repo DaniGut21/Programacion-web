@@ -1,5 +1,7 @@
 body{
     background-image: url("Dp1.png");
+    background-repeat: no-repeat;
+    background-size: cover;
     font-family:Arial;
     color:black;
 }
