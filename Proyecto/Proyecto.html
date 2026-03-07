@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TuneWiki - Iniciar Sesión</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 50%, #000033 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Decoración futurista 2026 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 100, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(100, 200, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .contenedor {
+            width: 90%;
+            max-width: 380px;
+            background-color: rgba(20, 20, 35, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 
+                0 0 30px #00ff88,
+                0 0 60px rgba(0, 255, 136, 0.3);
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 52px;
+            font-weight: bold;
+            letter-spacing: -2px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px #00ff88;
+        }
+        .logo span {
+            color: #00ff88;
+        }
+        
+        .subtitulo {
+            font-size: 13px;
+            color: #00ffcc;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        
+        h1 {
+            font-size: 26px;
+            margin: 10px 0 8px;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+        
+        p {
+            color: #a0a0ff;
+            margin-bottom: 35px;
+            font-size: 15px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 18px;
+            background-color: #1a1a2e;
+            border: 2px solid #334455;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            box-shadow: inset 0 0 8px rgba(0, 255, 136, 0.1);
+        }
+        
+        input:focus {
+            border-color: #00ff88;
+            outline: none;
+            box-shadow: 0 0 15px #00ff88;
+        }
+        
+        .boton-iniciar {
+            background-color: #00ff88;
+            color: black;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            font-size: 17px;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+            box-shadow: 0 0 20px #00ff88;
+            transition: all 0.3s;
+        }
+        
+        .boton-iniciar:hover {
+            background-color: #00ffaa;
+            box-shadow: 0 0 30px #00ffcc;
+            transform: scale(1.03);
+        }
+        
+        .boton-registro {
+            background-color: transparent;
+            color: #00ffcc;
+            padding: 15px;
+            border: 2px solid #00ffcc;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+        
+        .boton-registro:hover {
+            background-color: rgba(0, 255, 204, 0.1);
+            box-shadow: 0 0 25px #00ffcc;
+        }
+        
+        .enlace-olvidar {
+            color: #8899ff;
+            font-size: 13px;
+            text-decoration: none;
+            margin-top: 15px;
+            display: block;
+        }
+        
+        .pie {
+            margin-top: 40px;
+            font-size: 11px;
+            color: #556677;
+        }
+        
+        /* Líneas futuristas decorativas */
+        .linea-futuro {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            width: 80%;
+            left: 10%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor">
+        
+        <!-- Decoración superior -->
+        <div class="linea-futuro" style="top: 15px;"></div>
+        
+        <!-- Logo futurista -->
+        <div class="logo">
+            TUNE<span>WIKI</span>
+        </div>
+        <div class="subtitulo">2026 • FUTURO DE LA MÚSICA</div>
+
+        <h1>¡Bienvenido de vuelta!</h1>
+        <p>Conéctate al universo de música,<br>historia y videos en un solo lugar.</p>
+
+        <!-- Formulario básico -->
+        <form>
+            <!-- Usuario -->
+            <input type="text" 
+                   placeholder="Usuario o correo electrónico" 
+                   required>
+
+            <!-- Contraseña -->
+            <input type="password" 
+                   placeholder="Contraseña" 
+                   required>
+
+            <!-- Botón Iniciar Sesión (simula ir a la página principal) -->
+            <a href="principal.html" style="text-decoration: none;">
+                <button type="button" class="boton-iniciar">
+                    INICIAR SESIÓN
+                </button>
+            </a>
+
+            <!-- Botón Registrarse (simula ir a registro) -->
+            <a href="registro.html" style="text-decoration: none;">
+                <button type="button" class="boton-registro">
+                    REGISTRARSE
+                </button>
+            </a>
+
+            <!-- Enlace olvidar contraseña (por si lo quieres) -->
+            <a href="#" class="enlace-olvidar">¿Olvidaste tu contraseña?</a>
+        </form>
+
+        <!-- Pie de página -->
+        <div class="pie">
+            Este sitio está protegido por reCAPTCHA.<br>
+            Términos • Privacidad • © 2026 TuneWiki
+        </div>
+        
+        <!-- Decoración inferior -->
+        <div class="linea-futuro" style="bottom: 15px;"></div>
+
+    </div>
+
+</body>
+</html>
