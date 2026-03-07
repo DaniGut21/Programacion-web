@@ -74,7 +74,7 @@ p {
 input {
     width: 100%;
     padding: 9px;
-    margin-bottom: 25px;          /* ← Aquí aumenté el espacio */
+    margin-bottom: 25px;         
     background-color: #1a1a2e;
     border: 2px solid #334455;
     border-radius: 12px;
