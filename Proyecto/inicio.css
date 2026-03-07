@@ -68,13 +68,15 @@ body {
     margin: 0 auto;
 }
 
+/* Texto llamativo con gradiente (CORREGIDO) */
 .titulo-principal {
     font-size: 42px;
     font-weight: bold;
     text-align: center;
     margin: 20px 0 40px;
     background: linear-gradient(90deg, #00ff88, #00ffcc);
-    -webkit-background-clip: text;
+    -webkit-background-clip: text;     
+    background-clip: text;             
     color: transparent;
     text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
 }
