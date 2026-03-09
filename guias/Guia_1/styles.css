@@ -18,7 +18,7 @@ position:relative;
 }
 
 
-/* LIBROS (diapositiva 1) */
+/* ZONA LIBROS */
 
 .libros{
 
@@ -29,23 +29,6 @@ left:70px;
 
 width:320px;
 height:220px;
-
-cursor:pointer;
-
-}
-
-
-/* BOTON CONTINUAR */
-
-.continuar{
-
-position:absolute;
-
-top:250px;
-left:250px;
-
-width:850px;
-height:350px;
 
 cursor:pointer;
 
