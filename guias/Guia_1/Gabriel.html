@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+     <title>Mundo De Libros</title> 
+     <link rel="stylesheet" href="styles.css"> 
+</head>
+<body> <!-- Página 1: Inicio --> 
+    <section id="page1" class="page active"> 
+    <div class="header-nav"> 
+        <p>HOME &nbsp;&nbsp;&nbsp;BACK &nbsp;&nbsp;ABOUT &nbsp;&nbsp;&nbsp;MORE &nbsp;&nbsp;&nbsp;≡</p> 
+    </div>
+
+    <div class="hero"> 
+        <h1>Mundo</h1> 
+        <h1>De Libros</h1> 
+    </div> 
+    
+    <button class="cta-button" onclick="goToPage(2)">Explorar</button> 
+    </section> <!-- Página 2: Formulario --> 
+    
+    <section id="page2" class="page"> 
+        <div class="header-nav"> 
+            <p>HOME &nbsp;&nbsp;&nbsp;BACK &nbsp;&nbsp;ABOUT &nbsp;&nbsp;&nbsp;MORE &nbsp;&nbsp;&nbsp;≡</p> 
+        </div> 
+        
+        <div class="form-container"> 
+            <h2>Antes de continuar....</h2> 
+            <form id="userForm" onsubmit="submitForm(event)"> 
+                <div class="form-group"> 
+                    <label for="nombre">Nombre</label> 
+                    <input type="text" id="nombre" name="nombre" required> 
+                </div> 
+                
+                <div class="form-group"> 
+                    <label for="correo">Correo</label> 
+                    <input type="email" id="correo" name="correo" required> 
+                </div> 
+                
+                <div class="form-group"> 
+                    <label for="fecha">Fecha</label> 
+                    <input type="date" id="fecha" name="fecha" required> 
+                </div> 
+                
+                <button type="submit" class="submit-button">Continuar</button> 
+            </form> 
+        </div> 
+        
+        <button class="back-button" onclick="goToPage(1)">← Atrás</button> 
+    </section> <!-- Página 3: Seleccionar Autor --> 
+    
+    <section id="page3" class="page"> 
+        <div class="header-nav"> 
+            <p>HOME &nbsp;&nbsp;&nbsp;BACK &nbsp;&nbsp;ABOUT &nbsp;&nbsp;&nbsp;MORE &nbsp;&nbsp;&nbsp;≡</p> 
+        </div> 
+        
+        <h1>¿De cuál te gustaría saber?</h1> 
+        <div class="authors-container"> 
+            <div class="author-card" onclick="goToAuthor('garcia')"> 
+                <img src="https://cdn.gamma.app/hef5372331zwbx6/imports/pptx/adee4734e1e363990cf8d071a558b57f/v2/16757a528b8a4f1199d05476b4d53ece/extracted/ppt/media/image11.jpeg" alt="Gabriel García Márquez"> 
+                <h3>Gabriel García Márquez</h3> 
+            </div> <div class="author-card" onclick="goToAuthor('mendoza')"> 
+                <img src="https://cdn.gamma.app/hef5372331zwbx6/imports/pptx/adee4734e1e363990cf8d071a558b57f/v2/16757a528b8a4f1199d05476b4d53ece/extracted/ppt/media/image12.jpeg" alt="Mario Mendoza"> 
+                <h3>Mario Mendoza</h3> 
+            </div> 
+        </div> 
+        
+        <button class="back-button" onclick="goToPage(2)">← Atrás</button> 
+    </section> <!-- Página 4: Gabriel García Márquez --> 
+    
+    <section id="page4" class="page"> 
+        <div class="header-nav"> 
+            <p>HOME &nbsp;&nbsp;&nbsp;BACK &nbsp;&nbsp;ABOUT &nbsp;&nbsp;&nbsp;MORE &nbsp;&nbsp;&nbsp;≡</p> 
+        </div> 
+        
+        <div class="author-detail"> 
+            <h1>Gabriel García Márquez</h1> 
+            <img src="https://cdn.gamma.app/hef5372331zwbx6/imports/pptx/adee4734e1e363990cf8d071a558b57f/v2/16757a528b8a4f1199d05476b4d53ece/extracted/ppt/media/image24.jpeg" alt="Gabriel García Márquez"> 
+            <p>Gabriel García Márquez (1927–2014) fue un escritor, periodista y novelista colombiano, considerado uno de los autores más importantes de la literatura en español. Fue ganador del Premio Nobel de Literatura gracias a sus obras que mezclan realidad y fantasía en el estilo llamado Realismo mágico.</p> 
+            <h3>Su libro más famoso es Cien años de soledad, publicado en 1967, una de las novelas más influyentes de la literatura latinoamericana. También escribió obras importantes como El amor en los tiempos del cólera.</h3> 
+            <h3>Nació en Aracataca y sus historias suelen inspirarse en la cultura y la vida de Colombia.</h3> 
+        </div> 
+        
+        <button class="back-button" onclick="goToPage(3)">← Atrás</button> 
+    </section> <!-- Página 5: Mario Mendoza --> 
+    
+    <section id="page5" class="page"> 
+        <div class="header-nav"> 
+            <p>HOME &nbsp;&nbsp;&nbsp;BACK &nbsp;&nbsp;ABOUT &nbsp;&nbsp;&nbsp;MORE &nbsp;&nbsp;&nbsp;≡</p> 
+        </div> 
+        
+        <div class="author-detail"> 
+            <h1>Mario Mendoza</h1> 
+            <img src="https://cdn.gamma.app/hef5372331zwbx6/imports/pptx/adee4734e1e363990cf8d071a558b57f/v2/16757a528b8a4f1199d05476b4d53ece/extracted/ppt/media/image28.jpeg" alt="Mario Mendoza"> 
+            <p>Mario Mendoza (nacido en 1964) es un escritor, periodista y profesor colombiano conocido por sus novelas urbanas y oscuras que exploran la realidad social de Bogotá.</p> 
+            <h3>Sus historias suelen tratar temas como la soledad, la violencia, la locura y los problemas de la sociedad moderna. Algunas de sus obras más conocidas son Satanás, La ciudad de los umbrales y Lady Masacre.</h3> 
+            <h3>Es uno de los autores contemporáneos más leídos en Colombia y muchas de sus obras están inspiradas en historias reales y en la vida urbana.</h3> 
+        </div> <button class="back-button" onclick="goToPage(3)">← Atrás</button> 
+    </section> 
+    
+    <script src="script.js"></script> 
+</body> 
+</html>
