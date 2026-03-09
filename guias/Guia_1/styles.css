@@ -1,70 +1,117 @@
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: Arial, Helvetica, sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-body{
-    overflow-x:hidden;
-}
-
-/* estructura de cada diapositiva */
 .slide{
-    width:100%;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    padding:40px;
+
+width:100%;
+height:100vh;
+
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+
+position:relative;
 }
 
-/* portada */
-.portada{
-    background:#f5f5f5;
-    position:relative;
+
+/* FONDOS DE LAS DIAPOSITIVAS */
+
+#slide1{
+background-image:url("img/slide1.png");
 }
 
-.titulo h1{
-    font-size:80px;
+#slide2{
+background-image:url("img/slide2.png");
 }
 
-.titulo h2{
-    font-size:60px;
-    font-weight:300;
+#slide3{
+background-image:url("img/slide3.png");
 }
 
-/* boton inferior derecha */
-.boton-siguiente{
-    position:absolute;
-    bottom:30px;
-    right:30px;
+#slide4{
+background-image:url("img/slide4.png");
 }
 
-.boton-siguiente img{
-    width:120px;
-    cursor:pointer;
-    transition:0.3s;
+
+
+/* ZONA LIBROS (primera diapositiva) */
+
+.zona-libros{
+
+position:absolute;
+
+bottom:40px;
+left:40px;
+
+width:350px;
+height:250px;
+
+cursor:pointer;
 }
 
-.boton-siguiente img:hover{
-    transform:scale(1.1);
+
+
+/* BOTON CONTINUAR */
+
+.continuar{
+
+position:absolute;
+
+top:350px;
+left:300px;
+
+width:900px;
+height:250px;
+
+cursor:pointer;
 }
 
-/* tabla diapositiva 2 */
-table{
-    width:80%;
-    border-collapse:collapse;
-    margin-top:40px;
+
+
+/* ZONA IR A AUTORES */
+
+.ir-autores{
+
+position:absolute;
+
+top:250px;
+left:300px;
+
+width:900px;
+height:400px;
+
+cursor:pointer;
 }
 
-th, td{
-    border:1px solid #333;
-    padding:15px;
-    text-align:center;
+
+
+/* AUTORES */
+
+.autor1{
+
+position:absolute;
+
+top:350px;
+left:200px;
+
+width:500px;
+height:350px;
+
+cursor:pointer;
 }
 
-th{
-    background:#ddd;
+.autor2{
+
+position:absolute;
+
+top:350px;
+right:200px;
+
+width:500px;
+height:350px;
+
+cursor:pointer;
 }
