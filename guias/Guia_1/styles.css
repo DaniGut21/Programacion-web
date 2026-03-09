@@ -1,0 +1,71 @@
+* { margin: 0; padding: 0; box-sizing: border-box; } 
+
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; overflow-x: hidden; }
+
+.page { display: none; min-height: 100vh; padding: 40px 20px; animation: fadeIn 0.5s ease-in; } 
+
+.page.active { display: flex; flex-direction: column; justify-content: center; align-items: center; } 
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } 
+
+.header-nav { position: absolute; top: 20px; left: 20px; font-size: 14px; color: #666; } /* Página 1: Inicio */ 
+
+#page1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; } 
+
+.hero { margin: 40px 0; } 
+
+.hero h1 { font-size: 4rem; font-weight: bold; margin: 20px 0; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); } 
+
+.cta-button { background-color: #ff6b6b; color: white; border: none; padding: 15px 40px; font-size: 18px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; margin-top: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); } 
+
+.cta-button:hover { background-color: #ff5252; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); } /* Página 2: Formulario */ 
+
+#page2 { background-color: #ffffff; } 
+
+.form-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); max-width: 500px; width: 100%; } 
+
+.form-container h2 { text-align: center; margin-bottom: 30px; color: #333; font-size: 24px; } 
+
+.form-group { margin-bottom: 20px; } 
+
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; } 
+
+.form-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; transition: border-color 0.3s ease; } 
+
+.form-group input:focus { outline: none; border-color: #667eea; } 
+
+.submit-button { width: 100%; padding: 12px; background-color: #667eea; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; } 
+
+.submit-button:hover { background-color: #5568d3; transform: translateY(-2px); } /* Página 3: Seleccionar Autor */ 
+
+#page3 { background-color: #f9f9f9; } 
+
+#page3 h1 { text-align: center; margin-bottom: 40px; font-size: 32px; color: #333; } 
+
+.authors-container { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; max-width: 900px; margin-bottom: 40px; } 
+
+.author-card { background: white; border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 300px; text-align: center; } 
+
+.author-card:hover { transform: translateY(-10px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); } 
+
+.author-card img { width: 100%; height: 300px; object-fit: cover; } 
+
+.author-card h3 { padding: 20px; font-size: 20px; color: #333; } /* Páginas 4 y 5: Detalle de Autor */ 
+
+#page4, #page5 { background-color: #ffffff; } 
+
+.author-detail { max-width: 800px; margin: 0 auto; } 
+
+.author-detail h1 { text-align: center; margin-bottom: 30px; font-size: 36px; color: #333; } 
+
+.author-detail img { width: 100%; max-width: 400px; height: auto; border-radius: 10px; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto; } 
+
+.author-detail p { font-size: 16px; line-height: 1.8; margin-bottom: 20px; color: #555; } 
+
+.author-detail h3 { font-size: 16px; line-height: 1.8; margin-bottom: 20px; color: #666; font-weight: 500; } /* Botón Atrás */ 
+
+.back-button { background-color: #667eea; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; margin-top: 30px; } 
+
+.back-button:hover { background-color: #5568d3; transform: translateY(-2px); } /* Responsive */ 
+
+@media (max-width: 768px) { .hero h1 { font-size: 2.5rem; } .authors-container { flex-direction: column; align-items: center; } .author-card { width: 100%; max-width: 300px; } .form-container { padding: 20px; } .author-detail h1 { font-size: 24px; } }
