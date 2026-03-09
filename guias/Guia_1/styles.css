@@ -17,7 +17,8 @@ position:relative;
 
 }
 
-/* ZONA LIBROS */
+
+/* LIBROS (diapositiva 1) */
 
 .libros{
 
@@ -34,7 +35,7 @@ cursor:pointer;
 }
 
 
-/* ZONA CONTINUAR */
+/* BOTON CONTINUAR */
 
 .continuar{
 
@@ -51,6 +52,40 @@ cursor:pointer;
 }
 
 
+/* FORMULARIO */
+
+.formulario{
+
+position:absolute;
+
+top:330px;
+left:460px;
+
+display:flex;
+flex-direction:column;
+
+gap:12px;
+
+width:260px;
+
+}
+
+.formulario input{
+
+padding:8px;
+font-size:14px;
+
+}
+
+.formulario button{
+
+padding:10px;
+font-size:15px;
+cursor:pointer;
+
+}
+
+
 /* AUTORES */
 
 .gabo{
@@ -58,7 +93,7 @@ cursor:pointer;
 position:absolute;
 
 top:330px;
-left:160px;
+left:150px;
 
 width:500px;
 height:380px;
@@ -72,7 +107,7 @@ cursor:pointer;
 position:absolute;
 
 top:330px;
-right:160px;
+right:150px;
 
 width:500px;
 height:380px;
