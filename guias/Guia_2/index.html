@@ -8,6 +8,14 @@
 </head>
 <body>
 
+    <!-- Elementos flotantes innovadores -->
+    <span class="floating-ingredient tomato" style="left: 10%; top: 15%;">🍅</span>
+    <span class="floating-ingredient cheese" style="right: 15%; top: 25%;">🧀</span>
+    <span class="floating-ingredient ham" style="left: 20%; bottom: 20%;">🍖</span>
+    <span class="floating-ingredient basil" style="right: 10%; bottom: 30%;">🌿</span>
+    <span class="floating-ingredient tomato" style="left: 5%; bottom: 10%;">🍅</span>
+    <span class="floating-ingredient cheese" style="right: 5%; top: 50%;">🧀</span>
+
     <div class="contenedor">
         <h1>Pedido de Pizzas Online</h1>
 
@@ -33,29 +41,35 @@
                 </div>
             </fieldset>
 
-            <!-- Pizzas -->
+            <!-- Pizzas con imágenes -->
             <fieldset>
                 <legend>Selecciona tus pizzas</legend>
 
                 <div class="pizza-opcion">
+                    <img src="https://thumbs.dreamstime.com/b/closeup-photo-ham-cheese-pizza-closeup-photo-homemade-fresh-ham-cheese-pizza-158535028.jpg" alt="Jamón y Queso" class="pizza-img">
                     <input type="checkbox" id="jamon-queso" name="pizzas" value="Jamon y Queso">
                     <label for="jamon-queso">Jamón y Queso</label>
                     <input type="number" name="cantidad_jamon_queso" min="0" max="20" value="0" class="cantidad">
                     <span class="etiqueta-cantidad">cantidad</span>
+                    <div class="tooltip">Pizza con jamón fresco y queso derretido. ¡Deliciosa!</div>
                 </div>
 
                 <div class="pizza-opcion">
+                    <img src="https://news.italianfood.net/wp-content/uploads/sites/2/2020/01/pizza-napoletana.jpg" alt="Napolitana" class="pizza-img">
                     <input type="checkbox" id="napolitana" name="pizzas" value="Napolitana">
                     <label for="napolitana">Napolitana</label>
                     <input type="number" name="cantidad_napolitana" min="0" max="20" value="0" class="cantidad">
                     <span class="etiqueta-cantidad">cantidad</span>
+                    <div class="tooltip">Clásica con tomate, ajo y orégano. ¡Auténtica italiana!</div>
                 </div>
 
                 <div class="pizza-opcion">
-                    <input type="checkbox" id="mozzarella" name="pizzas" value="Mozzarella">
-                    <label for="mozzarella">Mozzarella</label>
-                    <input type="number" name="cantidad_mozzarella" min="0" max="20" value="0" class="cantidad">
+                    <img src="https://www.shutterstock.com/shutterstock/photos/2686512803/display_1500/stock-photo-mozzarella-pizza-served-on-wooden-restaurant-table-close-up-2686512803.jpg" alt="Muzzarella" class="pizza-img">
+                    <input type="checkbox" id="muzzarella" name="pizzas" value="Muzzarella">
+                    <label for="muzzarella">Muzzarella</label>
+                    <input type="number" name="cantidad_muzzarella" min="0" max="20" value="0" class="cantidad">
                     <span class="etiqueta-cantidad">cantidad</span>
+                    <div class="tooltip">Queso mozzarella fresco y salsa. ¡Simple y perfecta!</div>
                 </div>
             </fieldset>
 
@@ -65,7 +79,7 @@
                 <textarea name="detalles" id="detalles" rows="5" placeholder="Ingredientes extras, sin algo, horario preferido, etc..."></textarea>
             </fieldset>
 
-            <!-- Botón de envío -->
+            <!-- Botón de envío con animación -->
             <div class="boton-contenedor">
                 <button type="submit">Enviar Pedido</button>
             </div>
