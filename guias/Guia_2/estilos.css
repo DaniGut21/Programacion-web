@@ -1,0 +1,164 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f8f1e9;
+    color: #333;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.contenedor {
+    max-width: 650px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+h1 {
+    text-align: center;
+    color: #c0392b;
+    margin-bottom: 30px;
+    font-size: 2.1rem;
+}
+
+fieldset {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background-color: #fff;
+}
+
+legend {
+    background: #c0392b;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.campo {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #444;
+}
+
+input[type="text"],
+input[type="tel"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+input[type="text"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+.pizza-opcion {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.pizza-opcion:hover {
+    background-color: #f9f5f5;
+}
+
+.pizza-opcion input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
+.pizza-opcion label {
+    margin: 0;
+    flex: 1;
+    min-width: 140px;
+}
+
+.cantidad {
+    width: 70px;
+    text-align: center;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.etiqueta-cantidad {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+    font-size: 1rem;
+    min-height: 110px;
+}
+
+.boton-contenedor {
+    text-align: center;
+    margin-top: 30px;
+}
+
+button {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+
+button:hover {
+    background: #a93226;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(192, 57, 43, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .contenedor {
+        padding: 20px;
+    }
+    
+    .pizza-opcion {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .pizza-opcion label {
+        margin-bottom: 6px;
+    }
+}
