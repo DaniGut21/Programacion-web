@@ -54,11 +54,11 @@ h1 {
 }
 
 @keyframes glow {
-    from { text-shadow: 0 0 5px #c0392b; }
-    to { text-shadow: 0 0 15px #e74c3c; }
+    from { text-shadow: 0 0 5px #752012; }
+    to { text-shadow: 0 0 15px #752012; }
 }
 
-/* Resto del CSS igual que antes... */
+/* Resto del CSS igual, pero actualizado para pizza-img */
 fieldset {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -120,15 +120,15 @@ textarea:focus {
 }
 
 .pizza-img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 50%;
+    width: 80px; /* Más ancho para ver mejor */
+    height: auto; /* Mantiene proporción original */
+    object-fit: contain; /* Muestra completa sin recortes */
+    border-radius: 8px; /* Bordes suaves, no círculo */
     transition: transform 0.3s;
 }
 
 .pizza-opcion:hover .pizza-img {
-    transform: scale(1.2);
+    transform: scale(1.1); /* Ligeramente más grande al hover */
 }
 
 .tooltip {
@@ -231,5 +231,9 @@ button:hover {
     .floating-ingredient {
         font-size: 2em; /* Más pequeños en móvil */
         opacity: 0.3;
+    }
+    
+    .pizza-img {
+        width: 100px; /* Ajuste para móvil */
     }
 }
