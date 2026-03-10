@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido de Pizzas</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <div class="contenedor">
+        <h1>Pedido de Pizzas Online</h1>
+
+        <form action="#" method="post" class="formulario-pedido">
+
+            <!-- Datos del cliente -->
+            <fieldset>
+                <legend>Datos Personales</legend>
+                
+                <div class="campo">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Escribe tu nombre completo" required>
+                </div>
+
+                <div class="campo">
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion" name="direccion" placeholder="Calle, número, barrio" required>
+                </div>
+
+                <div class="campo">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 3001234567" required>
+                </div>
+            </fieldset>
+
+            <!-- Pizzas -->
+            <fieldset>
+                <legend>Selecciona tus pizzas</legend>
+
+                <div class="pizza-opcion">
+                    <input type="checkbox" id="jamon-queso" name="pizzas" value="Jamon y Queso">
+                    <label for="jamon-queso">Jamón y Queso</label>
+                    <input type="number" name="cantidad_jamon_queso" min="0" max="20" value="0" class="cantidad">
+                    <span class="etiqueta-cantidad">cantidad</span>
+                </div>
+
+                <div class="pizza-opcion">
+                    <input type="checkbox" id="napolitana" name="pizzas" value="Napolitana">
+                    <label for="napolitana">Napolitana</label>
+                    <input type="number" name="cantidad_napolitana" min="0" max="20" value="0" class="cantidad">
+                    <span class="etiqueta-cantidad">cantidad</span>
+                </div>
+
+                <div class="pizza-opcion">
+                    <input type="checkbox" id="muzzarella" name="pizzas" value="Muzzarella">
+                    <label for="muzzarella">Muzzarella</label>
+                    <input type="number" name="cantidad_muzzarella" min="0" max="20" value="0" class="cantidad">
+                    <span class="etiqueta-cantidad">cantidad</span>
+                </div>
+            </fieldset>
+
+            <!-- Detalles adicionales -->
+            <fieldset>
+                <legend>Detalles del pedido</legend>
+                <textarea name="detalles" id="detalles" rows="5" placeholder="Ingredientes extras, sin algo, horario preferido, etc..."></textarea>
+            </fieldset>
+
+            <!-- Botón de envío -->
+            <div class="boton-contenedor">
+                <button type="submit">Enviar Pedido</button>
+            </div>
+
+        </form>
+    </div>
+
+</body>
+</html>
