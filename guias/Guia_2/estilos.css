@@ -54,11 +54,23 @@ h1 {
 }
 
 @keyframes glow {
-    from { text-shadow: 0 0 5px #752012; }
-    to { text-shadow: 0 0 15px #752012; }
+    from { text-shadow: 0 0 5px #c0392b; }
+    to { text-shadow: 0 0 15px #e74c3c; }
 }
 
-/* Resto del CSS igual, pero actualizado para pizza-img */
+/* Estilo para el mensaje de envío (nuevo) */
+.mensaje-envio {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 10px;
+    font-size: 1.8rem;
+    color: #c0392b;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Resto del CSS igual */
 fieldset {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -235,5 +247,10 @@ button:hover {
     
     .pizza-img {
         width: 100px; /* Ajuste para móvil */
+    }
+    
+    .mensaje-envio {
+        font-size: 1.4rem;
+        padding: 30px;
     }
 }
