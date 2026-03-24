@@ -19,7 +19,7 @@
     <div class="contenedor">
         <h1>Pedido de Pizzas Online</h1>
 
-        <form action="envio.html" method="get" class="formulario-pedido">  <!-- Cambiado a action="envio.html" para redirigir -->
+        <form action="envio.html" method="get" class="formulario-pedido">
 
             <!-- Datos del cliente -->
             <fieldset>
@@ -27,7 +27,11 @@
                 
                 <div class="campo">
                     <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Escribe tu nombre completo" required>
+                    <input type="text" id="nombre" name="nombre" 
+                    placeholder="Escribe tu nombre completo"
+                    pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+"
+                    title="Solo se permiten letras"
+                    required>
                 </div>
 
                 <div class="campo">
@@ -37,12 +41,20 @@
 
                 <div class="campo">
                     <label for="barrio">Barrio:</label>
-                    <input type="text" id="barrio" name="barrio" placeholder="Ej: Chapinero, Usaquen" required>
+                    <input type="text" id="barrio" name="barrio"
+                    placeholder="Ej: Chapinero, Usaquen"
+                    pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+"
+                    title="El barrio solo puede contener letras"
+                    required>
                 </div>
 
                 <div class="campo">
                     <label for="telefono">Teléfono:</label>
-                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 3001234567" required>
+                    <input type="tel" id="telefono" name="telefono"
+                    placeholder="Ej: 3001234567"
+                    pattern="[0-9]+"
+                    title="Solo números"
+                    required>
                 </div>
             </fieldset>
 
@@ -84,13 +96,29 @@
                 <textarea name="detalles" id="detalles" rows="5" placeholder="Ingredientes extras, sin algo, horario preferido, etc..."></textarea>
             </fieldset>
 
-            <!-- Botón de envío con animación -->
+            <!-- Botón de envío -->
             <div class="boton-contenedor">
                 <button type="submit">Enviar Pedido</button>
             </div>
 
         </form>
     </div>
+
+<script>
+
+document.getElementById("telefono").addEventListener("input", function(){
+this.value = this.value.replace(/[^0-9]/g,'');
+});
+
+document.getElementById("nombre").addEventListener("input", function(){
+this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');
+});
+
+document.getElementById("barrio").addEventListener("input", function(){
+this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');
+});
+
+</script>
 
 </body>
 </html>

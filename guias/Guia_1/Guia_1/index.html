@@ -221,6 +221,11 @@
             this.value = this.value.replace(/[0-9]/g, '');
         });
 
+        // Numero sin letras
+        document.getElementById('phone').addEventListener('input', function() {
+            this.value = this.value.replace(/[a-z]/g, '');
+        });
+
         // Tecla Escape → Home
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') showSlide(1);

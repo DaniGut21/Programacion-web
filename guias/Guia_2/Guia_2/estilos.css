@@ -70,6 +70,24 @@ h1 {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+.boton-volver-contenedor {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.boton-volver {
+    display: inline-block;
+    background: #e67e22;
+    color: white;
+    padding: 14px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+}
+
 /* Resto del CSS igual */
 fieldset {
     border: 1px solid #ddd;

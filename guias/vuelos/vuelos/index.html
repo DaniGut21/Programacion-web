@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Reserva de Vuelo - Datos del Pasajero</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<main class="page page-form">
+		<section class="card">
+			<h1>Reserva Tu Vuelo</h1>
+			<p class="subtitle">Completa tus datos para continuar a la seleccion de vuelo.</p>
+
+			<form id="passengerForm" class="form-grid">
+				<label>
+					Nombre
+					<input type="text" name="nombre" placeholder="Ej: Juan" required>
+				</label>
+
+				<label>
+					Apellido
+					<input type="text" name="apellido" placeholder="Ej: Rodriguez" required>
+				</label>
+
+				<label>
+					Sexo
+					<select name="sexo" required>
+						<option value="" disabled selected>Selecciona una opcion</option>
+						<option value="Femenino">Femenino</option>
+						<option value="Masculino">Masculino</option>
+						<option value="Prefiero no decir">Prefiero no decir</option>
+					</select>
+				</label>
+
+				<label>
+					Edad
+					<input type="number" name="edad" min="1" max="110" placeholder="Ej: 20" required>
+				</label>
+
+				<label class="full-width">
+					Correo electronico
+					<input type="email" name="correo" placeholder="ejemplo@correo.com" required>
+				</label>
+
+				<label class="full-width">
+					Profesion
+					<input type="text" name="profesion" placeholder="Ej: Estudiante" required>
+				</label>
+
+				<button type="submit" class="btn-primary full-width">Enviar y continuar</button>
+			</form>
+		</section>
+	</main>
+
+	<script src="script.js"></script>
+</body>
+</html>
