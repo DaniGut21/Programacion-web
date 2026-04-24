@@ -1,669 +1,276 @@
 <?php
+declare(strict_types=1);
 
-// ================================================
+// 1. DEFINICIÓN DE CLASES E INTERFACES (Lógica de Negocio)
+interface OperacionesBancarias {
+    public function depositar(float $monto): void;
+    public function retirar(float $monto): bool;
+}
 
-// BANCO HBC - Todo en un solo archivo
+abstract class CuentaBase implements OperacionesBancarias {
+    protected string $numero;
+    protected string $titular;
+    protected float $saldo;
 
-// ================================================
+    public function __construct(string $numero, string $titular, float $saldoInicial) {
+        $this->numero = $numero;
+        $this->titular = $titular;
+        $this->saldo = $saldoInicial;
+    }
+
+    public function getSaldo(): float { return $this->saldo; }
+    public function getTitular(): string { return $this->titular; }
+    public function getNumero(): string { return $this->numero; }
+    abstract public function getTipoNombre(): string;
+    abstract public function calcularCosto(float $monto): float;
+}
+
+class CuentaAhorros extends CuentaBase {
+    private const TASA = 0.015;
+    public function getTipoNombre(): string { return "Ahorros Premium"; }
+    public function calcularCosto(float $monto): float { return 0.0; }
+    public function depositar(float $monto): void { $this->saldo += $monto; }
+    public function retirar(float $monto): bool {
+        if ($this->saldo >= $monto) { $this->saldo -= $monto; return true; }
+        return false;
+    }
+    public function aplicarInteres(): float {
+        $ganancia = $this->saldo * self::TASA;
+        $this->saldo += $ganancia;
+        return $ganancia;
+    }
+}
+
+class CuentaCorriente extends CuentaBase {
+    private const GMF = 0.004; // 4x1000
+    public function getTipoNombre(): string { return "Corriente Empresarial"; }
+    public function calcularCosto(float $monto): float { return $monto * self::GMF; }
+    public function depositar(float $monto): void { $this->saldo += ($monto - $this->calcularCosto($monto)); }
+    public function retirar(float $monto): bool {
+        $total = $monto + $this->calcularCosto($monto);
+        if (($this->saldo + 30000) >= $total) { $this->saldo -= $total; return true; }
+        return false;
+    }
+}
 
 session_start();
 
-
-if (!isset($_SESSION['account'])) {
-
-$_SESSION['account'] = null;
-
-}
-
-
-function money($amount) {
-
-return '$' . number_format($amount, 2, ',', '.');
-
-}
-
-
-function calcularInteres($balance, $rate) {
-
-return $balance * $rate;
-
-}
-
-
-// Procesar acciones POST
-
+// 2. PROCESAMIENTO DE ACCIONES (SERVIDOR)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
 
-$action = $_POST['action'] ?? '';
+    if ($action === 'create') {
+        $tipo = $_POST['tipo'] ?? '';
+        $nombre = $_POST['nombre'] ?? '';
+        $numStr = $_POST['numero'] ?? '';
+        $saldoStr = $_POST['saldo'] ?? '';
 
+        if (empty($tipo)) {
+            $_SESSION['error'] = "⚠️ Debe seleccionar Ahorros o Corriente.";
+        } elseif (preg_match('/[0-9]/', $nombre)) {
+            $_SESSION['error'] = "❌ El nombre no puede contener números.";
+        } else {
+            $_SESSION['account_obj'] = ($tipo === 'ahorros') 
+                ? new CuentaAhorros($numStr, $nombre, (float)$saldoStr) 
+                : new CuentaCorriente($numStr, $nombre, (float)$saldoStr);
+            $_SESSION['mensaje'] = "✅ Cuenta activada exitosamente.";
+        }
+        header("Location: banco-hbc.php"); exit;
+    }
 
-if ($action === 'create') {
+    if (isset($_SESSION['account_obj'])) {
+        $acc = $_SESSION['account_obj'];
+        $montoStr = $_POST['monto'] ?? '0';
+        $monto = (float)$montoStr;
 
-$tipo = $_POST['tipo'] ?? 'ahorros';
-
-$numero = preg_replace('/\s+/', '', $_POST['numero'] ?? '100234');
-
-$nombre = $_POST['nombre'] ?? 'Ana García López';
-
-$saldo = (float) str_replace([',', '.'], ['', '.'], $_POST['saldo'] ?? 100000); // acepta 100.000 o 100.000
-
-$interes = (float) str_replace(['%', ','], ['', '.'], $_POST['interes'] ?? 1.5) / 100;
-
-
-$_SESSION['account'] = [
-
-'type' => $tipo,
-
-'number' => $numero,
-
-'name' => $nombre,
-
-'balance' => $saldo,
-
-'rate' => ($tipo === 'ahorros')? $interes : 0,
-
-'fee_rate' => ($tipo === 'corriente')? 0.004: 0,
-
-'sobregiro' => ($tipo === 'corriente')? 30000: 0
-
-];
-
-$_SESSION['mensaje'] = "Cuenta creada exitosamente";
-
-header("Location: banco-hbc.php");
-
-exit;
-
+        if ($action === 'deposit') {
+            $costo = $acc->calcularCosto($monto);
+            $acc->depositar($monto);
+            $msg = "💰 Depósito exitoso por $" . number_format($monto, 0);
+            if ($costo > 0) $msg .= " (Impuesto 4x1000: -$" . number_format($costo, 0) . ")";
+            $_SESSION['mensaje'] = $msg;
+        } 
+        elseif ($action === 'withdraw') { 
+            $costo = $acc->calcularCosto($monto);
+            if($acc->retirar($monto)) {
+                $msg = "💸 Retiro exitoso por $" . number_format($monto, 0);
+                if ($costo > 0) $msg .= " (Gravamen GMF: $" . number_format($costo, 0) . ")";
+                $_SESSION['mensaje'] = $msg;
+            } else {
+                $_SESSION['error'] = "❌ Fondos insuficientes para el retiro y costos de transacción.";
+            }
+        }
+        elseif ($action === 'interest' && $acc instanceof CuentaAhorros) {
+            $ganancia = $acc->aplicarInteres();
+            $_SESSION['mensaje'] = "📈 Intereses aplicados: +$" . number_format($ganancia, 2) . " (Tasa 1.5%)";
+        }
+        header("Location: banco-hbc.php"); exit;
+    }
 }
 
-
-if ($action === 'deposit' && $_SESSION['account']) {
-
-$monto = (float) str_replace([',', '.'], ['', '.'], $_POST['monto'] ?? 0);
-
-$acc = &$_SESSION['account'];
-
-$fee = ($acc['fee_rate'] > 0) ? $monto * $acc['fee_rate'] : 0;
-
-$acc['balance'] += ($monto - $fee);
-
-$_SESSION['mensaje'] = "Depósito de " . money($monto). " realizado." . ($fee > 0 ? " Cobro 4×1000: " . money($fee): "");
-
-header("Location: banco-hbc.php");
-
-exit;
-
-}
-
-
-if ($action === 'withdraw' && $_SESSION['account']) {
-
-$monto = (float) str_replace([',', '.'], ['', '.'], $_POST['monto'] ?? 0);
-
-$acc = &$_SESSION['account'];
-
-if ($acc['balance'] < $monto && $acc['type'] === 'ahorros') {
-
-$_SESSION['error'] = "❌ Saldo insuficiente";
-
-} else {
-
-$fee = ($acc['fee_rate'] > 0) ? $monto * $acc['fee_rate'] : 0;
-
-$acc['balance'] -= ($monto + $fee);
-
-$_SESSION['mensaje'] = "Retiro de " . money($monto). " realizado." . ($fee > 0 ? " Cobro 4×1000: " . money($fee): "");
-
-}
-
-header("Location: banco-hbc.php");
-
-exit;
-
-}
-
-
-if ($action === 'interest' && $_SESSION['account'] && $_SESSION['account']['type'] === 'ahorros') {
-
-$acc = &$_SESSION['account'];
-
-$interes = calcularInteres($acc['balance'], $acc['rate']);
-
-$acc['balance'] += $interes;
-
-$_SESSION['mensaje'] = "Intereses acreditados: +" . money($interes);
-
-header("Location: banco-hbc.php");
-
-exit;
-
-}
-
-}
-
-
-// Cerrar sesión
-
-if (isset($_GET['logout'])) {
-
-session_destroy();
-
-header("Location: banco-hbc.php");
-
-exit;
-
-}
-
-
-$acc = $_SESSION['account'];
-
-$isAhorros = $acc && $acc['type'] === 'ahorros';
-
-$page = $_GET['page'] ?? 'home';
-
+if (isset($_GET['logout'])) { session_destroy(); header("Location: banco-hbc.php"); exit; }
+$acc = $_SESSION['account_obj'] ?? null;
 ?>
 
-
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Banco HBC</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<style>
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-body { font-family: 'Inter', system-ui, sans-serif; }
-
-.header-blue { background: linear-gradient(90deg, #001f3f, #003366); }
-
-.btn-marine { background-color: #001f3f; }
-
-.btn-marine:hover { background-color: #003366; }
-
-.card { box-shadow: 0 10px 15px -3px rgb(0 31 63 / 0.15); }
-
-</style>
-
+    <meta charset="UTF-8">
+    <title>Banco HBC - Gestión Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.6); }
+        .btn-hbc { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hbc:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,31,63,0.1); }
+    </style>
 </head>
-
-<body class="bg-slate-100">
-
-
-<?php if (!$acc): // Pantalla Crear Cuenta ?>
-
-<div class="max-w-2xl mx-auto pt-12 px-4">
-
-<div class="header-blue text-white p-10 rounded-t-3xl text-center">
-
-<div class="flex justify-center items-center gap-4 mb-3">
-
-<div class="w-14 h-14 bg-white text-[#001f3f] rounded-3xl flex items-center justify-center text-4xl font-bold">HBC</div>
-
-<h1 class="text-5xl font-semibold">Banco HBC</h1>
-
-</div>
-
-<p class="text-2xl">Sistema de Cuentas Bancarias</p>
-
-<p class="mt-2 opacity-90">Seguro · Confiable · Simple</p>
-
-</div>
-
-
-<div class="bg-white rounded-b-3xl card p-10">
-
-<h2 class="text-3xl font-semibold text-center mb-2">Crear nueva cuenta</h2>
-
-<p class="text-center text-slate-500 mb-8">Completa los datos para comenzar</p>
-
-
-<form method="POST" class="space-y-8" onsubmit="if(!document.getElementById('tipo').value){ alert('Por favor, selecciona un tipo de cuenta (Ahorros o Corriente)'); return false; }">
-
-<input type="hidden" name="action" value="create">
-
-
-<div>
-
-<label class="block text-sm font-medium text-slate-600 mb-3">Tipo de cuenta</label>
-
-<div class="grid grid-cols-2 gap-4">
-
-<button type="button" onclick="selectType(this, 'ahorros')"
-
-class="type-btn flex flex-col items-center py-8 border-2 border-slate-200 rounded-3xl hover:border-[#001f3f] transition-all">
-
-<i class="fa-solid fa-piggy-bank text-5xl mb-4 text-slate-400"></i>
-
-<span class="font-semibold text-xl">Ahorros</span>
-
-</button>
-
-<button type="button" onclick="selectType(this, 'corriente')"
-
-class="type-btn flex flex-col items-center py-8 border-2 border-slate-200 rounded-3xl hover:border-[#001f3f] transition-all">
-
-<i class="fa-solid fa-credit-card text-5xl mb-4 text-slate-400"></i>
-
-<span class="font-semibold text-xl">Corriente</span>
-
-</button>
-
-</div>
-
-<input type="hidden" name="tipo" id="tipo" required>
-
-</div>
-
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<label class="block text-sm font-medium mb-1">Número de cuenta</label>
-
-<input type="text" name="numero" value="100234" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-6 py-4 border rounded-2xl focus:outline-none focus:border-[#001f3f]" required>
-
-</div>
-
-<div>
-
-<label class="block text-sm font-medium mb-1">Nombre del cliente</label>
-
-<input type="text" name="nombre" value="Ana Garcia Lopez" oninput="this.value = this.value.replace(/[0-9]/g, '')" class="w-full px-6 py-4 border rounded-2xl focus:outline-none focus:border-[#001f3f]" required>
-
-</div>
-
-</div>
-
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<label class="block text-sm font-medium mb-1">Saldo inicial ($)</label>
-
-<input type="text" name="saldo" value="100000" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-6 py-4 border rounded-2xl focus:outline-none focus:border-[#001f3f]" required>
-
-</div>
-
-<div>
-
-<label class="block text-sm font-medium mb-1">Interés mensual (%)</label>
-
-<input type="text" name="interes" value="1.5" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')" class="w-full px-6 py-4 border rounded-2xl focus:outline-none focus:border-[#001f3f]" required>
-
-</div>
-
-</div>
-
-
-<button type="submit" class="btn-marine w-full py-6 text-white text-2xl font-semibold rounded-3xl flex items-center justify-center gap-3">
-
-Crear cuenta <i class="fa-solid fa-arrow-right"></i>
-
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-
-<?php else: // Dashboard y otras pantallas ?>
-
-<div class="header-blue text-white px-6 py-5 flex items-center justify-between sticky top-0 z-50">
-
-<div class="flex items-center gap-3">
-
-<div class="w-11 h-11 bg-white text-[#001f3f] rounded-2xl flex items-center justify-center text-3xl font-bold">HBC</div>
-
-<div>
-
-<div class="text-2xl font-semibold">Banco HBC</div>
-
-<div class="text-xs opacity-75">v1.0 · 2025</div>
-
-</div>
-
-</div>
-
-<div class="flex gap-8 text-sm">
-
-<a href="banco-hbc.php" class="flex items-center gap-2 hover:underline"><i class="fa-solid fa-house"></i> Mi Cuenta</a>
-
-<a href="banco-hbc.php?page=deposit" class="flex items-center gap-2 hover:underline"><i class="fa-solid fa-arrow-up-from-bracket"></i> Depósito</a>
-
-<a href="banco-hbc.php?page=withdraw" class="flex items-center gap-2 hover:underline"><i class="fa-solid fa-arrow-down-to-bracket"></i> Retiro</a>
-
-<?php if ($isAhorros): ?>
-
-<a href="banco-hbc.php?action=interest" class="flex items-center gap-2 hover:underline"><i class="fa-solid fa-hand-holding-dollar"></i> Intereses</a>
-
-<?php endif; ?>
-
-</div>
-
-<a href="?logout=1" class="flex items-center gap-2 hover:text-red-300"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
-
-</div>
-
-
-<div class="max-w-4xl mx-auto p-6">
-
-
-<?php if (isset($_SESSION['mensaje'])): ?>
-
-<div class="bg-emerald-100 border border-emerald-400 text-emerald-800 px-6 py-4 rounded-3xl mb-6 flex items-center gap-3">
-
-<i class="fa-solid fa-check-circle text-2xl"></i>
-
-<?= htmlspecialchars($_SESSION['mensaje']) ?>
-
-</div>
-
-<?php unset($_SESSION['mensaje']); ?>
-
-<?php endif; ?>
-
-
-<?php if (isset($_SESSION['error'])): ?>
-
-<div class="bg-red-100 border border-red-400 text-red-800 px-6 py-4 rounded-3xl mb-6 flex items-center gap-3">
-
-<i class="fa-solid fa-circle-exclamation text-2xl"></i>
-
-<?= htmlspecialchars($_SESSION['error']) ?>
-
-</div>
-
-<?php unset($_SESSION['error']); ?>
-
-<?php endif; ?>
-
-
-<?php if ($page === 'home'): // Panel de control ?>
-
-<div class="bg-white rounded-3xl card p-10">
-
-<div class="flex justify-between items-start">
-
-<div>
-
-<span class="px-5 py-2 bg-emerald-100 text-emerald-700 font-semibold rounded-3xl text-sm">
-
-<?= $acc['type'] === 'ahorros' ? 'Cuenta de Ahorros' : 'Cuenta Corriente' ?>
-
-</span>
-
-<h1 class="text-4xl font-bold mt-4"><?= htmlspecialchars($acc['name']) ?></h1>
-
-<p class="text-slate-500">N° <?= $acc['number'] ?></p>
-
-</div>
-
-<div class="text-right">
-
-<div class="text-6xl font-bold text-[#001f3f]"><?= money($acc['balance']) ?></div>
-
-<p class="text-slate-500">Saldo disponible</p>
-
-</div>
-
-</div>
-
-
-<?php if ($isAhorros): ?>
-
-<div class="mt-12 grid grid-cols-3 gap-6">
-
-<div class="bg-slate-50 rounded-2xl p-6">
-
-<p class="text-sm text-slate-500">Tasa mensual</p>
-
-<p class="text-3xl font-bold"><?= number_format($acc['rate']*100, 1) ?>%</p>
-
-</div>
-
-<div class="bg-emerald-50 rounded-2xl p-6 col-span-2">
-
-<p class="text-emerald-700">Interés estimado este mes</p>
-
-<p class="text-4xl font-bold text-emerald-600">+ <?= money(calcularInteres($acc['balance'], $acc['rate'])) ?></p>
-
-<form method="POST" class="mt-4">
-
-<input type="hidden" name="action" value="interest">
-
-<button type="submit" class="bg-emerald-600 text-white px-8 py-3 rounded-2xl hover:bg-emerald-700">Acreditar intereses</button>
-
-</form>
-
-</div>
-
-</div>
+<body class="min-h-screen">
+
+<?php if (!$acc): ?>
+    <div class="max-w-md mx-auto pt-20 px-6">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-[#001f3f] italic">BANCO HBC</h1>
+            <p class="text-slate-400 text-sm">Ingeniería de Sistemas - UNIMINUTO</p>
+        </div>
+
+        <div class="glass-card p-10 rounded-[2.5rem] shadow-2xl">
+            <?php if(isset($_SESSION['error'])): ?>
+                <div class="bg-red-50 text-red-600 text-xs p-4 rounded-xl mb-4 border border-red-100 italic flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <?= $_SESSION['error']; unset($_SESSION['error']); ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" id="mainForm" class="space-y-5">
+                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="tipo" id="tipo_val">
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="setTipo('ahorros', this)" class="tipo-btn flex-1 py-4 rounded-2xl border-2 border-slate-100 flex flex-col items-center gap-2 transition-all hover:bg-slate-50">
+                        <i class="fa-solid fa-piggy-bank text-slate-300"></i>
+                        <span class="text-[10px] font-bold uppercase">Ahorros</span>
+                    </button>
+                    <button type="button" onclick="setTipo('corriente', this)" class="tipo-btn flex-1 py-4 rounded-2xl border-2 border-slate-100 flex flex-col items-center gap-2 transition-all hover:bg-slate-50">
+                        <i class="fa-solid fa-wallet text-slate-300"></i>
+                        <span class="text-[10px] font-bold uppercase">Corriente</span>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" name="nombre" id="input_nombre" placeholder="Nombre completo" oninput="this.value = this.value.replace(/[0-9]/g, '')" class="w-full bg-slate-50/80 p-4 rounded-xl outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-900 transition-all" required>
+                    
+                    <input type="text" name="numero" id="input_cuenta" placeholder="Número de cuenta" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full bg-slate-50/80 p-4 rounded-xl outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-900 transition-all" required>
+                    
+                    <input type="text" name="saldo" id="input_saldo" placeholder="Saldo inicial ($)" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full bg-slate-50/80 p-4 rounded-xl outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-900 transition-all font-bold" required>
+                </div>
+
+                <button type="submit" class="btn-hbc w-full bg-[#001f3f] text-white py-5 rounded-2xl font-bold">ABRIR CUENTA</button>
+            </form>
+        </div>
+    </div>
 
 <?php else: ?>
+    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto w-full">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#001f3f] rounded-lg flex items-center justify-center text-white font-bold shadow-lg">H</div>
+            <span class="font-extrabold text-lg text-slate-800 tracking-tighter">BANCO HBC</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="bg-emerald-50 px-3 py-1.5 rounded-full flex items-center gap-2">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="text-[9px] font-bold text-emerald-600 uppercase">Seguridad Activa</span>
+            </div>
+            <a href="?logout=1" class="text-slate-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-right-from-bracket"></i></a>
+        </div>
+    </nav>
 
-<div class="mt-10 bg-amber-50 border border-amber-200 rounded-3xl p-8">
+    <div class="max-w-5xl mx-auto px-6 w-full">
+        <?php if(isset($_SESSION['mensaje'])): ?>
+            <div class="bg-blue-900 text-white p-5 rounded-2xl mb-6 shadow-xl flex items-center gap-4 border-l-4 border-emerald-400 animate-in fade-in slide-in-from-top-4 duration-500">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <p class="text-sm font-medium"><?= $_SESSION['mensaje']; unset($_SESSION['mensaje']); ?></p>
+            </div>
+        <?php endif; ?>
 
-<p class="font-semibold text-amber-800">Cobro 4×1000 (0,4% por operación)</p>
+        <?php if(isset($_SESSION['error'])): ?>
+            <div class="bg-red-50 text-red-600 p-5 rounded-2xl mb-6 border border-red-100 text-sm flex items-center gap-4">
+                <i class="fa-solid fa-circle-xmark"></i>
+                <p class="font-bold"><?= $_SESSION['error']; unset($_SESSION['error']); ?></p>
+            </div>
+        <?php endif; ?>
 
-<p class="text-sm text-amber-700 mt-2">Se aplica en depósitos y retiros.</p>
+        <div class="glass-card rounded-[2.5rem] p-10 mb-8 shadow-sm">
+            <p class="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-2"><?= $acc->getTipoNombre() ?></p>
+            <h2 class="text-6xl font-black text-[#001f3f] tracking-tighter">$<?= number_format($acc->getSaldo(), 2, ',', '.') ?></h2>
+            <div class="mt-4 flex items-center gap-3 text-slate-500">
+                <i class="fa-solid fa-user-circle"></i>
+                <span class="text-sm font-semibold"><?= htmlspecialchars($acc->getTitular()) ?> (N° <?= $acc->getNumero() ?>)</span>
+            </div>
+        </div>
 
-</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card p-8 rounded-[2rem]">
+                <h3 class="font-bold text-slate-800 mb-6 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-blue-500"></i> Centro de Transacciones
+                </h3>
+                <form method="POST" id="opForm" class="space-y-4">
+                    <input type="text" name="monto" id="input_monto" placeholder="Monto a operar..." oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full bg-slate-50 p-5 rounded-xl outline-none border border-slate-100 focus:border-blue-900 font-bold text-lg">
+                    <div class="flex gap-3">
+                        <button type="submit" name="action" value="deposit" class="flex-1 bg-slate-900 text-white py-4 rounded-xl text-xs font-bold btn-hbc">DEPÓSITO</button>
+                        <button type="submit" name="action" value="withdraw" class="flex-1 border-2 border-slate-900 text-[#001f3f] py-4 rounded-xl text-xs font-bold btn-hbc">RETIRO</button>
+                    </div>
+                </form>
+            </div>
 
+            <?php if ($acc instanceof CuentaAhorros): ?>
+                <div class="bg-[#001f3f] p-8 rounded-[2rem] text-white flex flex-col justify-between shadow-xl shadow-blue-900/20">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                            <h3 class="font-bold">Interés Estándar Activo</h3>
+                        </div>
+                        <p class="text-blue-200 text-xs leading-relaxed">Su cuenta genera rendimientos del 1.5%. Haga clic para capitalizar sus intereses ahora.</p>
+                    </div>
+                    <form method="POST" class="mt-6">
+                        <button type="submit" name="action" value="interest" class="w-full bg-white text-[#001f3f] py-4 rounded-xl font-bold text-xs hover:scale-[1.02] transition-all">CAPITALIZAR RENDIMIENTO</button>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 <?php endif; ?>
-
-
-<div class="mt-12 grid grid-cols-3 gap-4">
-
-<a href="?page=deposit" class="btn-marine text-white text-center py-8 rounded-3xl font-semibold text-xl flex flex-col items-center gap-2">
-
-<i class="fa-solid fa-arrow-up-from-bracket text-3xl"></i> Deposito
-
-</a>
-
-<a href="?page=withdraw" class="btn-marine text-white text-center py-8 rounded-3xl font-semibold text-xl flex flex-col items-center gap-2">
-
-<i class="fa-solid fa-arrow-down-to-bracket text-3xl"></i> Retirar
-
-</a>
-
-<a href="?logout=1" class="bg-slate-700 text-white text-center py-8 rounded-3xl font-semibold text-xl flex flex-col items-center gap-2">
-
-<i class="fa-solid fa-plus text-3xl"></i> Nueva cuenta
-
-</a>
-
-</div>
-
-</div>
-
-
-<?php elseif ($page === 'deposit'): ?>
-
-<div class="bg-white rounded-3xl card p-10 max-w-2xl mx-auto">
-
-<h2 class="text-3xl font-semibold text-center mb-2">Depositar</h2>
-
-<p class="text-center text-slate-500 mb-10">Ingresa el monto a depositar</p>
-
-<form method="POST">
-
-<input type="hidden" name="action" value="deposit">
-
-<div class="relative mb-8">
-
-<span class="absolute left-8 top-1/2 -translate-y-1/2 text-5xl text-slate-300">$</span>
-
-<input type="text" name="monto" id="monto" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-
-class="w-full pl-20 pr-8 py-7 text-5xl font-semibold border-2 border-slate-200 rounded-3xl text-center focus:border-[#001f3f] outline-none"
-
-placeholder="0" required>
-
-</div>
-
-
-<div class="grid grid-cols-4 gap-3 mb-10">
-
-<button type="button" onclick="setAmount(50000)" class="border py-4 rounded-2xl hover:bg-[#001f3f] hover:text-white transition">50,000</button>
-
-<button type="button" onclick="setAmount(100000)" class="border py-4 rounded-2xl hover:bg-[#001f3f] hover:text-white transition">100,000</button>
-
-<button type="button" onclick="setAmount(200000)" class="border py-4 rounded-2xl hover:bg-[#001f3f] hover:text-white transition">200,000</button>
-
-<button type="button" onclick="setAmount(500000)" class="border py-4 rounded-2xl hover:bg-[#001f3f] hover:text-white transition">500,000</button>
-
-</div>
-
-
-<div class="flex gap-4">
-
-<button type="submit" class="flex-1 btn-marine py-6 text-white text-xl font-semibold rounded-3xl">Confirmar depósito</button>
-
-<a href="banco-hbc.php" class="flex-1 border border-slate-300 py-6 text-center text-slate-700 text-xl font-semibold rounded-3xl">Cancelar</a>
-
-</div>
-
-</form>
-
-</div>
-
-
-<?php elseif ($page === 'withdraw'): ?>
-
-<div class="bg-white rounded-3xl card p-10 max-w-2xl mx-auto">
-
-<h2 class="text-3xl font-semibold text-center mb-2">Retirar</h2>
-
-<p class="text-center text-slate-500 mb-10">Ingresa el monto a retirar</p>
-
-<form method="POST">
-
-<input type="hidden" name="action" value="withdraw">
-
-<div class="relative mb-8">
-
-<span class="absolute left-8 top-1/2 -translate-y-1/2 text-5xl text-slate-300">$</span>
-
-<input type="text" name="monto" id="monto_ret" oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateAfterWithdraw()"
-
-class="w-full pl-20 pr-8 py-7 text-5xl font-semibold border-2 border-slate-200 rounded-3xl text-center focus:border-[#001f3f] outline-none"
-
-placeholder="0" required>
-
-</div>
-
-
-<div class="bg-slate-50 rounded-3xl p-6 mb-8">
-
-<div class="flex justify-between text-lg">
-
-<span>Saldo disponible:</span>
-
-<span class="font-bold"><?= money($acc['balance']) ?></span>
-
-</div>
-
-<div class="flex justify-between text-lg mt-4 pt-4 border-t">
-
-<span>Saldo tras retiro:</span>
-
-<span id="saldo_tras" class="font-bold text-emerald-600">—</span>
-
-</div>
-
-</div>
-
-
-<div class="flex gap-4">
-
-<button type="submit" class="flex-1 btn-marine py-6 text-white text-xl font-semibold rounded-3xl">Confirmar retiro</button>
-
-<a href="banco-hbc.php" class="flex-1 border border-slate-300 py-6 text-center text-slate-700 text-xl font-semibold rounded-3xl">Cancelar</a>
-
-</div>
-
-</form>
-
-</div>
-
-<?php endif; ?>
-
-</div>
-
-<?php endif; ?>
-
 
 <script>
+// VALIDACIÓN EN TIEMPO REAL Y ALERTAS
+function setTipo(tipo, btn) {
+    document.getElementById('tipo_val').value = tipo;
+    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('border-blue-900', 'bg-blue-50'));
+    btn.classList.add('border-blue-900', 'bg-blue-50');
+}
 
-function selectType(btn, tipo) {
-
-document.getElementById('tipo').value = tipo;
-
-document.querySelectorAll('.type-btn').forEach(b => {
-
-b.classList.remove('border-[#001f3f]', 'bg-[#001f3f]', 'text-white');
-
+// Bloqueo de envío si hay errores lógicos
+document.getElementById('mainForm')?.addEventListener('submit', function(e) {
+    const tipo = document.getElementById('tipo_val').value;
+    const nombre = document.getElementById('input_nombre').value;
+    
+    if(!tipo) {
+        alert("⚠️ Por favor, seleccione un tipo de cuenta.");
+        e.preventDefault();
+    } else if(/[0-9]/.test(nombre)) {
+        alert("❌ El nombre no puede contener números.");
+        e.preventDefault();
+    }
 });
 
-btn.classList.add('border-[#001f3f]', 'bg-[#001f3f]', 'text-white');
-
-}
-
-
-function setAmount(val) {
-
-document.getElementById('monto').value = val;
-
-}
-
-
-function updateAfterWithdraw() {
-
-const monto = parseFloat(document.getElementById('monto_ret').value) || 0;
-
-const actual = <?= $acc ? $acc['balance'] : 0 ?>;
-
-const tras = actual - monto;
-
-const el = document.getElementById('saldo_tras');
-
-if (tras >= 0) {
-
-el.textContent = '$' + tras.toLocaleString('es-ES') + '.00';
-
-el.className = 'font-bold text-emerald-600';
-
-} else {
-
-el.textContent = '❌ Saldo insuficiente';
-
-el.className = 'font-bold text-red-600';
-
-}
-
-}
-
-
-tailwind.config = { contenido: [] };
-
+document.getElementById('opForm')?.addEventListener('submit', function(e) {
+    const monto = document.getElementById('input_monto').value;
+    if(isNaN(monto) || monto === "" || monto <= 0) {
+        alert("❌ Ingrese un monto numérico válido mayor a cero.");
+        e.preventDefault();
+    }
+});
 </script>
-
 </body>
-
 </html>
