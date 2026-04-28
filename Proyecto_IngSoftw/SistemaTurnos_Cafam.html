@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPS CAFAM — Sistema Integrado de Turnos y Citas</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&family=Barlow+Condensed:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* =====================================================
+   VARIABLES GLOBALES Y RESET
+   Paleta institucional EPS CAFAM
+===================================================== */
+:root {
+  --blue-dark:   #002F6C;
+  --blue-main:   #0054A6;
+  --blue-mid:    #2D7DD2;
+  --blue-light:  #E8F0FB;
+  --green-main:  #009B4E;
+  --green-dark:  #006B35;
+  --green-light: #E6F5EC;
+  --red:         #DC2626;
+  --amber:       #D97706;
+  --white:       #FFFFFF;
+  --gray-50:     #F8FAFC;
+  --gray-100:    #F1F5F9;
+  --gray-200:    #E2E8F0;
+  --gray-400:    #94A3B8;
+  --gray-600:    #475569;
+  --gray-900:    #0F172A;
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.12);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.18);
+  --radius:      12px;
+  --radius-sm:   8px;
+  --transition:  all 0.3s ease;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Exo 2',sans-serif;background:var(--gray-100);color:var(--gray-900);min-height:100vh;overflow-x:hidden;}
+
+/* =====================================================
+   BARRA SUPERIOR DE MODO
+===================================================== */
+.mode-bar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:var(--blue-dark);display:flex;align-items:center;
+  padding:0 20px;height:54px;box-shadow:0 2px 16px rgba(0,0,0,0.35);gap:10px;
+}
+.mode-bar .brand{
+  color:white;font-weight:800;font-size:1.05rem;letter-spacing:.06em;
+  flex:1;display:flex;align-items:center;gap:10px;white-space:nowrap;
+}
+.mode-bar .brand span{color:var(--green-main);}
+.mode-btn{
+  padding:7px 16px;border:2px solid rgba(255,255,255,.2);border-radius:100px;
+  background:transparent;color:rgba(255,255,255,.65);font-family:'Exo 2',sans-serif;
+  font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;
+}
+.mode-btn:hover{border-color:rgba(255,255,255,.6);color:white;}
+.mode-btn.active{background:var(--green-main);border-color:var(--green-main);color:white;}
+
+/* =====================================================
+   CONTENIDO PRINCIPAL
+===================================================== */
+.main-content{padding-top:54px;min-height:100vh;}
+
+/* =====================================================
+   VISTA TAQUILLA / KIOSCO
+===================================================== */
+#kiosk-view{
+  display:flex;flex-direction:column;align-items:center;
+  min-height:calc(100vh - 54px);
+  background:linear-gradient(135deg,#E8F0FB 0%,#F1F5F9 50%,#E6F5EC 100%);
+  padding:30px 20px 80px;
+}
+.kiosk-card{
+  width:100%;max-width:500px;background:white;border-radius:20px;
+  box-shadow:var(--shadow-lg);overflow:hidden;animation:slideUp .4s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.kiosk-header{
+  background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue-main) 100%);
+  padding:22px 26px;display:flex;align-items:center;gap:14px;
+}
+.kiosk-logo{
+  width:50px;height:50px;background:white;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;font-weight:900;color:var(--blue-main);
+  font-family:'Barlow Condensed',sans-serif;flex-shrink:0;
+}
+.kiosk-header-text h1{color:white;font-size:1.05rem;font-weight:800;letter-spacing:.08em;}
+.kiosk-header-text p{color:rgba(255,255,255,.6);font-size:.75rem;margin-top:2px;}
+.kiosk-datetime{margin-left:auto;text-align:right;color:rgba(255,255,255,.75);font-size:.78rem;line-height:1.5;}
+.kiosk-body{padding:26px;}
+.kiosk-footer{
+  padding:12px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.kiosk-footer .nit{font-size:.68rem;color:var(--gray-400);}
+.kiosk-footer .sys-status{display:flex;align-items:center;gap:6px;font-size:.68rem;color:var(--green-main);font-weight:600;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green-main);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Pasos de progreso */
+.step-bar{display:flex;gap:6px;justify-content:center;padding:14px 26px 0;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--gray-200);transition:var(--transition);}
+.step-dot.active{background:var(--blue-main);width:24px;border-radius:4px;}
+.step-dot.done{background:var(--green-main);}
+
+/* Animación de pantalla */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn .3s ease;}
+
+/* Botones */
+.btn{
+  width:100%;padding:13px 18px;border:none;border-radius:var(--radius);
+  font-family:'Exo 2',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;
+  transition:var(--transition);display:flex;align-items:center;justify-content:center;
+  gap:8px;text-transform:uppercase;letter-spacing:.05em;
+}
+.btn-primary{background:linear-gradient(135deg,var(--blue-main),var(--blue-mid));color:white;box-shadow:0 4px 14px rgba(0,84,166,.3);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,84,166,.4);}
+.btn-secondary{background:linear-gradient(135deg,var(--green-main),#00B85E);color:white;box-shadow:0 4px 14px rgba(0,155,78,.3);}
+.btn-secondary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,155,78,.4);}
+.btn-outline{background:transparent;border:2px solid var(--gray-200);color:var(--gray-600);}
+.btn-outline:hover{border-color:var(--blue-main);color:var(--blue-main);}
+.btn-sm{padding:9px 14px;font-size:.82rem;}
+.btn[disabled]{opacity:.4;cursor:not-allowed;transform:none!important;}
+
+/* Formularios */
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:.78rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.form-group input,.form-group select{
+  width:100%;padding:11px 13px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);
+  font-family:'Exo 2',sans-serif;font-size:.95rem;color:var(--gray-900);background:white;
+  transition:var(--transition);outline:none;
+}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue-main);box-shadow:0 0 0 3px rgba(0,84,166,.1);}
+.form-row{display:grid;grid-template-columns:1fr 2fr;gap:12px;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* Títulos de pantalla */
+.screen-title{font-size:1.15rem;font-weight:800;color:var(--blue-dark);margin-bottom:4px;}
+.screen-subtitle{font-size:.83rem;color:var(--gray-600);margin-bottom:20px;}
+
+/* Tarjeta de bienvenida */
+.welcome-icon{font-size:3.5rem;text-align:center;margin-bottom:14px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.info-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.info-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:13px;text-align:center;}
+.info-card .ic-icon{font-size:1.4rem;margin-bottom:5px;}
+.info-card .ic-label{font-size:.72rem;color:var(--gray-600);font-weight:700;text-transform:uppercase;}
+
+/* Alertas */
+.alert{padding:11px 14px;border-radius:var(--radius-sm);font-size:.83rem;margin-bottom:14px;display:flex;align-items:flex-start;gap:9px;line-height:1.4;}
+.alert-info{background:#E0F2FE;color:#075985;border-left:4px solid #0369A1;}
+.alert-success{background:var(--green-light);color:var(--green-dark);border-left:4px solid var(--green-main);}
+.alert-warning{background:#FEF3C7;color:#92400E;border-left:4px solid var(--amber);}
+
+/* Opciones de menú */
+.menu-options{display:flex;flex-direction:column;gap:12px;}
+.menu-option{
+  display:flex;align-items:center;padding:16px;border:2px solid var(--gray-200);
+  border-radius:var(--radius);cursor:pointer;transition:var(--transition);background:white;gap:14px;
+}
+.menu-option:hover{border-color:var(--blue-main);background:var(--blue-light);transform:translateX(4px);}
+.menu-option .opt-icon{width:46px;height:46px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.opt-icon.blue{background:var(--blue-light);}
+.opt-icon.green{background:var(--green-light);}
+.opt-icon.amber{background:#FEF3C7;}
+.menu-option .opt-text h3{font-size:.95rem;font-weight:700;color:var(--gray-900);margin-bottom:2px;}
+.menu-option .opt-text p{font-size:.75rem;color:var(--gray-600);}
+
+/* Grid de servicios */
+.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;}
+.service-btn{
+  padding:13px 8px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);
+  background:white;cursor:pointer;transition:var(--transition);text-align:center;font-family:'Exo 2',sans-serif;
+}
+.service-btn:hover,.service-btn.selected{border-color:var(--blue-main);background:var(--blue-light);}
+.svc-icon{font-size:1.5rem;margin-bottom:5px;}
+.svc-name{font-size:.75rem;font-weight:700;color:var(--gray-900);}
+.svc-wait{font-size:.68rem;color:var(--gray-600);margin-top:2px;}
+
+/* Ticket */
+.ticket{
+  background:linear-gradient(135deg,var(--blue-dark) 0%,#003580 100%);
+  border-radius:var(--radius);padding:22px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;
+}
+.ticket::before{content:'';position:absolute;top:-30px;right:-30px;width:90px;height:90px;background:rgba(255,255,255,.04);border-radius:50%;}
+.ticket-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.5);margin-bottom:5px;}
+.ticket-number{font-family:'Share Tech Mono',monospace;font-size:4rem;color:#FFD700;line-height:1;margin-bottom:7px;text-shadow:0 0 20px rgba(255,215,0,.4);}
+.ticket-service{color:white;font-weight:700;font-size:.95rem;margin-bottom:14px;}
+.ticket-details{display:flex;justify-content:space-around;background:rgba(255,255,255,.08);border-radius:var(--radius-sm);padding:11px;gap:10px;}
+.td-item{text-align:center;}
+.td-label{font-size:.65rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;}
+.td-value{font-size:.88rem;color:white;font-weight:700;margin-top:3px;}
+
+/* Badge de prioridad */
+.priority-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.priority-alta{background:#FEE2E2;color:#DC2626;}
+.priority-media{background:#FEF3C7;color:#D97706;}
+.priority-normal{background:#E0F2FE;color:#0369A1;}
+
+/* Paciente card */
+.patient-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:15px;margin-bottom:18px;}
+.patient-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--blue-main),var(--blue-mid));color:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;}
+.patient-name{font-size:.95rem;font-weight:700;color:var(--gray-900);}
+.patient-doc{font-size:.78rem;color:var(--gray-600);margin-top:2px;}
+.patient-detail{font-size:.75rem;color:var(--gray-600);margin-top:5px;}
+
+/* Botón volver */
+.back-btn{display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--gray-600);font-family:'Exo 2',sans-serif;font-size:.83rem;font-weight:600;cursor:pointer;padding:7px 0;margin-bottom:14px;transition:var(--transition);}
+.back-btn:hover{color:var(--blue-main);}
+.divider{border:none;border-top:1px solid var(--gray-200);margin:18px 0;}
+
+/* Grid de fechas y horas */
+.date-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.date-btn{padding:9px 5px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);background:white;cursor:pointer;transition:var(--transition);text-align:center;font-family:'Exo 2',sans-serif;}
+.date-btn:hover,.date-btn.selected{border-color:var(--blue-main);background:var(--blue-light);}
+.db-day{font-size:.62rem;color:var(--gray-600);text-transform:uppercase;}
+.db-num{font-size:1.1rem;font-weight:700;color:var(--gray-900);}
+.db-month{font-size:.62rem;color:var(--gray-600);}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+.time-btn{padding:10px 6px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);background:white;cursor:pointer;transition:var(--transition);text-align:center;font-family:'Exo 2',sans-serif;font-size:.88rem;font-weight:600;color:var(--gray-900);}
+.time-btn:hover,.time-btn.selected{border-color:var(--green-main);background:var(--green-light);color:var(--green-dark);}
+.time-btn.occupied{background:var(--gray-100);color:var(--gray-400);cursor:not-allowed;text-decoration:line-through;}
+
+/* =====================================================
+   VISTA TV / SALA DE ESPERA
+===================================================== */
+#tv-view{
+  display:none;min-height:calc(100vh - 54px);
+  background:#060C1A;color:white;flex-direction:column;
+}
+#tv-view.show{display:flex;}
+.tv-header{
+  display:flex;align-items:center;padding:14px 30px;
+  background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);gap:24px;
+}
+.tv-logo{display:flex;align-items:center;gap:13px;}
+.tv-logo-box{width:46px;height:46px;background:var(--blue-main);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:white;}
+.tv-logo-text h1{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:900;letter-spacing:.1em;color:white;}
+.tv-logo-text p{font-size:.68rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;}
+.tv-meta{flex:1;display:flex;justify-content:center;gap:32px;}
+.tv-meta-item{text-align:center;}
+.tv-meta-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);}
+.tv-meta-val{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:900;color:white;line-height:1.1;}
+.tv-meta-val.gold{color:#FFD700;}
+.tv-clock{text-align:right;}
+.tv-clock .time{font-family:'Share Tech Mono',monospace;font-size:1.9rem;color:white;line-height:1;}
+.tv-clock .date{font-size:.68rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+
+.tv-body{display:flex;flex:1;padding:26px 30px;gap:26px;}
+
+/* Panel principal - turno actual */
+.tv-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.tv-now-label{font-size:.8rem;text-transform:uppercase;letter-spacing:.2em;color:rgba(255,255,255,.35);margin-bottom:12px;}
+.tv-current-box{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;padding:38px 56px;text-align:center;margin-bottom:22px;min-width:320px;
+}
+.tv-current-box.flash{animation:flashAnim .9s ease;}
+@keyframes flashAnim{0%{background:rgba(255,215,0,.18);border-color:#FFD700;}100%{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);}}
+.tv-turn-num{font-family:'Barlow Condensed',sans-serif;font-size:6.5rem;font-weight:900;line-height:1;color:#FFD700;text-shadow:0 0 36px rgba(255,215,0,.3);letter-spacing:-.01em;}
+.tv-turn-svc{font-size:1rem;color:rgba(255,255,255,.8);font-weight:600;margin-top:9px;text-transform:uppercase;letter-spacing:.06em;}
+.tv-turn-mod{font-size:.82rem;color:rgba(255,255,255,.38);margin-top:5px;}
+.tv-turn-prio{margin-top:12px;}
+.tv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;}
+.tv-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:13px;text-align:center;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1.9rem;font-weight:900;color:white;line-height:1;}
+.stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3);margin-top:3px;}
+
+/* Panel de cola */
+.tv-queue-panel{
+  width:310px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;display:flex;flex-direction:column;
+}
+.tv-queue-header{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.35);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.q-count-badge{background:var(--blue-main);color:white;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:100px;}
+.tv-queue-list{display:flex;flex-direction:column;gap:7px;flex:1;overflow-y:auto;}
+.queue-item{display:flex;align-items:center;padding:11px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:11px;gap:11px;transition:var(--transition);}
+.queue-item.is-next{border-color:rgba(0,155,78,.35);background:rgba(0,155,78,.09);}
+.qi-turn{font-family:'Share Tech Mono',monospace;font-size:1.2rem;font-weight:700;color:white;min-width:52px;}
+.qi-turn.emerg{color:#F87171;}
+.qi-info{flex:1;}
+.qi-name{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85);}
+.qi-svc{font-size:.69rem;color:rgba(255,255,255,.38);margin-top:2px;}
+.tv-queue-empty{text-align:center;color:rgba(255,255,255,.2);font-size:.82rem;padding:28px 0;flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;}
+.tv-queue-empty .ei{font-size:2.2rem;opacity:.3;}
+
+/* Ticker inferior */
+.tv-ticker{background:var(--blue-dark);padding:9px 30px;display:flex;align-items:center;gap:14px;overflow:hidden;}
+.ticker-badge{background:var(--green-main);color:white;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:3px 9px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+.ticker-scroll{font-size:.8rem;color:rgba(255,255,255,.65);white-space:nowrap;animation:ticker 25s linear infinite;}
+@keyframes ticker{0%{transform:translateX(60vw);}100%{transform:translateX(-100%);}}
+
+/* =====================================================
+   BARRA DE ADMINISTRACIÓN
+===================================================== */
+.admin-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:900;
+  background:rgba(6,12,26,.97);border-top:1px solid rgba(255,255,255,.1);
+  padding:9px 20px;display:none;align-items:center;gap:10px;
+}
+.admin-bar.show{display:flex;}
+.admin-label{color:rgba(255,255,255,.35);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;margin-right:4px;}
+.admin-btn{
+  padding:7px 15px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;
+  color:white;font-family:'Exo 2',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:var(--transition);
+}
+.admin-btn:hover{background:rgba(255,255,255,.1);}
+.admin-btn.green-btn{background:var(--green-main);border-color:var(--green-main);}
+.admin-btn.green-btn:hover{background:var(--green-dark);}
+.admin-demo{margin-left:auto;color:rgba(255,255,255,.25);font-size:.72rem;}
+
+/* =====================================================
+   UTILITARIOS
+===================================================== */
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     BARRA DE MODOS (navegación del demo)
+══════════════════════════════════════════════════ -->
+<div class="mode-bar">
+  <div class="brand"><span>C</span>AFAM &nbsp;·&nbsp; Sistema Integrado de Turnos</div>
+  <button class="mode-btn active" id="btn-kiosk" onclick="app.setModo('kiosk')">🖥️ Taquilla Autoservicio</button>
+  <button class="mode-btn" id="btn-tv" onclick="app.setModo('tv')">📺 Sala de Espera (TV)</button>
+  <button class="mode-btn" id="btn-admin" onclick="app.setModo('admin')">⚙️ Administrador</button>
+</div>
+
+<div class="main-content">
+
+  <!-- ══════════════════════════════════════════════
+       VISTA: TAQUILLA AUTOSERVICIO
+  ══════════════════════════════════════════════ -->
+  <div id="kiosk-view">
+    <div class="kiosk-card">
+      <div class="kiosk-header">
+        <div class="kiosk-logo">C</div>
+        <div class="kiosk-header-text">
+          <h1>EPS CAFAM</h1>
+          <p>Sistema de Gestión de Turnos y Citas</p>
+        </div>
+        <div class="kiosk-datetime">
+          <div id="kiosk-time">--:--:--</div>
+          <div id="kiosk-date">---</div>
+        </div>
+      </div>
+      <div class="step-bar" id="step-bar">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="kiosk-body" id="kiosk-body"></div>
+      <div class="kiosk-footer">
+        <span class="nit">NIT: 860.007.550-9 &nbsp;|&nbsp; v3.2.1</span>
+        <span class="sys-status"><span class="status-dot"></span>Sistema activo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       VISTA: TV SALA DE ESPERA
+  ══════════════════════════════════════════════ -->
+  <div id="tv-view">
+    <div class="tv-header">
+      <div class="tv-logo">
+        <div class="tv-logo-box">C</div>
+        <div class="tv-logo-text">
+          <h1>EPS CAFAM</h1>
+          <p>Sala de Espera · Gestión de Turnos</p>
+        </div>
+      </div>
+      <div class="tv-meta">
+        <div class="tv-meta-item">
+          <div class="tv-meta-label">Módulos Activos</div>
+          <div class="tv-meta-val" id="tv-modulos">5</div>
+        </div>
+        <div class="tv-meta-item">
+          <div class="tv-meta-label">Tiempo Promedio</div>
+          <div class="tv-meta-val gold" id="tv-avg">8 min</div>
+        </div>
+      </div>
+      <div class="tv-clock">
+        <div class="time" id="tv-time">--:--</div>
+        <div class="date" id="tv-date">---</div>
+      </div>
+    </div>
+
+    <div class="tv-body">
+      <!-- Panel principal -->
+      <div class="tv-main">
+        <div class="tv-now-label">Turno Actual</div>
+        <div class="tv-current-box" id="tv-current-box">
+          <div class="tv-turn-num" id="tv-turn-num">---</div>
+          <div class="tv-turn-svc" id="tv-turn-svc">En espera de llamado...</div>
+          <div class="tv-turn-mod" id="tv-turn-mod">Favor espere su turno</div>
+          <div class="tv-turn-prio" id="tv-turn-prio"></div>
+        </div>
+        <div class="tv-stats">
+          <div class="tv-stat"><div class="stat-val" id="s-cola">0</div><div class="stat-label">En Cola</div></div>
+          <div class="tv-stat"><div class="stat-val" id="s-atendidos">0</div><div class="stat-label">Atendidos Hoy</div></div>
+          <div class="tv-stat"><div class="stat-val" id="s-citas">0</div><div class="stat-label">Citas Agendadas</div></div>
+        </div>
+      </div>
+      <!-- Panel de cola -->
+      <div class="tv-queue-panel">
+        <div class="tv-queue-header">
+          <span>Próximos Turnos</span>
+          <span class="q-count-badge" id="q-count">0</span>
+        </div>
+        <div class="tv-queue-list" id="tv-queue-list">
+          <div class="tv-queue-empty"><div class="ei">🕐</div><div>Sin turnos en espera</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tv-ticker">
+      <span class="ticker-badge">Aviso</span>
+      <span class="ticker-scroll">
+        Bienvenido a EPS CAFAM &nbsp;·&nbsp; Por favor tenga su documento de identidad a la mano &nbsp;·&nbsp;
+        Respete el orden de llamado &nbsp;·&nbsp; Para urgencias diríjase directamente al Módulo 1 &nbsp;·&nbsp;
+        Horario de atención: Lunes a Viernes 6:00am – 8:00pm &nbsp;·&nbsp; Sábados 7:00am – 2:00pm &nbsp;·&nbsp;
+        Línea de atención al usuario: 01 8000 123 456
+      </span>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<!-- Barra de administrador -->
+<div class="admin-bar" id="admin-bar">
+  <span class="admin-label">Admin</span>
+  <button class="admin-btn green-btn" onclick="sistema.llamarSiguienteTurno()">📢 Llamar Siguiente Turno</button>
+  <button class="admin-btn" onclick="sistema.agregarTurnoDemo()">➕ Agregar Turno Demo</button>
+  <button class="admin-btn" onclick="sistema.resetear()">🔄 Reiniciar Sistema</button>
+  <span class="admin-demo">Panel de Demostración</span>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+  ██████╗  ██████╗  ██████╗
+  ██╔══██╗██╔═══██╗██╔═══██╗
+  ██████╔╝██║   ██║██║   ██║
+  ██╔═══╝ ██║   ██║██║   ██║
+  ██║     ╚██████╔╝╚██████╔╝
+  ╚═╝      ╚═════╝  ╚═════╝
+  PROGRAMACIÓN ORIENTADA A OBJETOS — EPS CAFAM
+  Clases: Paciente · Cita · Turno · ColaTurnos
+           SistemaGestion · TaquillaUI · PantallaEsperaUI · App
+══════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: Paciente
+   Encapsula los datos de un usuario afiliado a EPS CAFAM.
+
+   Equivalente conceptual en C++:
+   ─────────────────────────────
+   class Paciente {
+   private:
+     int id;
+     std::string nombre, apellido, tipoDoc, numDoc;
+     std::tm fechaNacimiento;
+     std::string telefono, correo;
+     bool embarazada;
+   public:
+     Paciente(int id, std::string nombre, ...);
+     int calcularEdad() const;
+     int getNivelPrioridad() const;      // 1=Alta 2=Media 3=Normal
+     std::string getNombreCompleto() const;
+   };
+───────────────────────────────────────────────────────────── */
+class Paciente {
+  constructor(id, nombre, apellido, tipoDoc, numDoc, fechaNacimiento, telefono, correo, embarazada = false) {
+    this.id = id;
+    this.nombre = nombre;
+    this.apellido = apellido;
+    this.tipoDoc = tipoDoc;            // CC | TI | CE | PA
+    this.numDoc = numDoc;
+    this.fechaNacimiento = new Date(fechaNacimiento);
+    this.telefono = telefono;
+    this.correo = correo;
+    this.embarazada = embarazada;
+    this.eps = 'CAFAM';
+    this.creadoEn = new Date();
+  }
+
+  /** Calcula la edad exacta en años. */
+  calcularEdad() {
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - this.fechaNacimiento.getFullYear();
+    const m = hoy.getMonth() - this.fechaNacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < this.fechaNacimiento.getDate())) edad--;
+    return edad;
+  }
+
+  /**
+   * Determina la prioridad según REQFUN-3:
+   *  1 = Alta   → embarazadas, adultos mayores ≥65 años
+   *  2 = Media  → niños ≤12 años
+   *  3 = Normal → población general
+   */
+  getNivelPrioridad() {
+    if (this.embarazada) return 1;
+    const edad = this.calcularEdad();
+    if (edad >= 65) return 1;
+    if (edad <= 12) return 2;
+    return 3;
+  }
+
+  getPrioridadInfo() {
+    const p = this.getNivelPrioridad();
+    if (p === 1) return { texto: '🔴 Prioridad Alta',  clase: 'priority-alta',   emoji: '🔴' };
+    if (p === 2) return { texto: '🟡 Prioridad Media', clase: 'priority-media',  emoji: '🟡' };
+    return         { texto: '🔵 Normal',              clase: 'priority-normal', emoji: '🔵' };
+  }
+
+  getNombreCompleto() { return `${this.nombre} ${this.apellido}`; }
+  getIniciales()      { return (this.nombre[0] + this.apellido[0]).toUpperCase(); }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: Cita
+   Representa una cita médica programada. (REQFUN-5)
+
+   C++:
+     class Cita {
+       int id;  Paciente* paciente;
+       std::string fecha, hora, servicio, estado;
+       bool estaVigente() const;
+     };
+───────────────────────────────────────────────────────────── */
+class Cita {
+  constructor(id, paciente, fecha, hora, servicio) {
+    this.id        = id;
+    this.paciente  = paciente;
+    this.fecha     = fecha;        // "YYYY-MM-DD"
+    this.hora      = hora;         // "HH:MM"
+    this.servicio  = servicio;
+    this.estado    = 'programada'; // 'programada' | 'cancelada' | 'completada'
+    this.creadaEn  = new Date();
+  }
+
+  estaVigente() {
+    return this.estado === 'programada';
+  }
+
+  getFechaFormateada() {
+    const d = new Date(this.fecha + 'T12:00:00');
+    return d.toLocaleDateString('es-CO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: Turno
+   Representa un turno asignado en la cola. (REQFUN-2, REQFUN-3)
+
+   C++:
+     class Turno {
+       std::string codigo;    // "A-015"
+       Paciente* paciente;
+       std::string tipo;      // "CON_CITA" | "SIN_CITA"
+       int prioridad;
+       std::string estado;    // "esperando" | "llamado" | "atendido"
+       void llamar(std::string modulo);
+       int getTiempoEspera() const;
+     };
+───────────────────────────────────────────────────────────── */
+class Turno {
+  constructor(codigo, paciente, tipo, prioridad, servicio) {
+    this.codigo          = codigo;       // ej: "A-015"
+    this.paciente        = paciente;
+    this.tipo            = tipo;         // "CON_CITA" | "SIN_CITA"
+    this.prioridad       = prioridad;    // 1 | 2 | 3
+    this.servicio        = servicio;
+    this.estado          = 'esperando';  // 'esperando' | 'llamado'
+    this.modulo          = null;
+    this.horaAsignacion  = new Date();
+    this.horaLlamado     = null;
+  }
+
+  /** Cambia el estado del turno a "llamado" y registra el módulo. */
+  llamar(modulo) {
+    this.estado      = 'llamado';
+    this.modulo      = modulo;
+    this.horaLlamado = new Date();
+  }
+
+  /** Tiempo de espera en minutos desde la asignación. */
+  getTiempoEspera() {
+    return Math.floor((new Date() - this.horaAsignacion) / 60000);
+  }
+
+  getLetra()  { return this.codigo.split('-')[0]; }
+  getIcono()  { return this.tipo === 'CON_CITA' ? '📅' : '🚶'; }
+
+  getPrioridadInfo() {
+    if (this.prioridad === 1) return { texto:'Alta',  clase:'priority-alta',   emoji:'🔴' };
+    if (this.prioridad === 2) return { texto:'Media', clase:'priority-media',  emoji:'🟡' };
+    return                    { texto:'Normal',clase:'priority-normal', emoji:'🔵' };
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: ColaTurnos
+   Cola de prioridad que ordena los turnos por nivel de urgencia
+   y orden de llegada. (Implementa Priority Queue)
+
+   C++:
+     #include <queue>
+     struct Comparador {
+       bool operator()(Turno* a, Turno* b) {
+         if (a->prioridad != b->prioridad) return a->prioridad > b->prioridad;
+         return a->horaAsignacion > b->horaAsignacion;
+       }
+     };
+     std::priority_queue<Turno*, std::vector<Turno*>, Comparador> cola;
+───────────────────────────────────────────────────────────── */
+class ColaTurnos {
+  constructor() {
+    this.turnos     = [];                  // Array de objetos Turno activos
+    this.contadores = { A: 0, B: 0, C: 0 }; // Contadores por letra
+  }
+
+  /** Genera el siguiente código correlativo, ej: "A-007" */
+  generarCodigo(letra) {
+    this.contadores[letra]++;
+    return `${letra}-${String(this.contadores[letra]).padStart(3, '0')}`;
+  }
+
+  /**
+   * Inserta un turno y reordena la cola:
+   *  1º Prioridad numérica (1 > 2 > 3)
+   *  2º CON_CITA antes que SIN_CITA dentro del mismo nivel
+   *  3º Hora de llegada (FIFO)
+   */
+  insertar(turno) {
+    this.turnos.push(turno);
+    this.turnos.sort((a, b) => {
+      if (a.prioridad !== b.prioridad) return a.prioridad - b.prioridad;
+      if (a.tipo === 'CON_CITA' && b.tipo !== 'CON_CITA') return -1;
+      if (b.tipo === 'CON_CITA' && a.tipo !== 'CON_CITA') return 1;
+      return a.horaAsignacion - b.horaAsignacion;
+    });
+    return turno;
+  }
+
+  /** Extrae y retorna el turno de mayor prioridad. */
+  extraer() {
+    return this.turnos.length ? this.turnos.shift() : null;
+  }
+
+  obtenerTodos() { return [...this.turnos]; }
+  estaVacia()    { return this.turnos.length === 0; }
+  getTamano()    { return this.turnos.length; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: SistemaGestion   [Patrón Singleton]
+   Controlador central del sistema EPS CAFAM.
+   Gestiona pacientes, citas, turnos e historial.
+   Notifica cambios a los observadores (patrón Observer).
+
+   C++ (Singleton):
+     class SistemaGestion {
+     private:
+       static SistemaGestion* instancia;
+       SistemaGestion() {}
+     public:
+       static SistemaGestion* getInstance() {
+         if (!instancia) instancia = new SistemaGestion();
+         return instancia;
+       }
+       Paciente* registrarPaciente(...);
+       Turno*    solicitarTurno(Paciente*, bool, std::string);
+       Cita*     agendarCita(Paciente*, ...);
+       Turno*    llamarSiguienteTurno();
+     };
+───────────────────────────────────────────────────────────── */
+class SistemaGestion {
+  constructor() {
+    if (SistemaGestion._inst) return SistemaGestion._inst;
+
+    this.pacientes        = new Map();  // numDoc → Paciente
+    this.citas            = [];
+    this.colaTurnos       = new ColaTurnos();
+    this.turnoActual      = null;
+    this.historial        = [];         // Turnos ya llamados
+
+    this.contPacientes    = 0;
+    this.contCitas        = 0;
+    this.totalAtendidos   = 0;
+
+    // Módulos de atención disponibles
+    this.modulos = [
+      'Módulo 1 — Urgencias',
+      'Módulo 2 — Medicina General',
+      'Módulo 3 — Medicina General',
+      'Módulo 4 — Pediatría',
+      'Módulo 5 — Especialistas',
+    ];
+    this._moduloIdx = 0;
+
+    // Lista de observadores (UI que se actualiza al cambiar estado)
+    this._observers = [];
+
+    SistemaGestion._inst = this;
+    this._cargarDatosDemo();
+  }
+
+  // ── Patrón Observer ──────────────────────────────────────
+  suscribir(fn)            { this._observers.push(fn); }
+  _notificar(evt, datos)   { this._observers.forEach(fn => fn(evt, datos)); }
+
+  // ── REQFUN-1: Registro de pacientes ─────────────────────
+  registrarPaciente(nombre, apellido, tipoDoc, numDoc, fechaNac, tel, correo, embarazada = false) {
+    const p = new Paciente(++this.contPacientes, nombre, apellido, tipoDoc, numDoc, fechaNac, tel, correo, embarazada);
+    this.pacientes.set(numDoc, p);
+    this._notificar('paciente-registrado', p);
+    return p;
+  }
+
+  buscarPaciente(numDoc) { return this.pacientes.get(numDoc) || null; }
+
+  // ── REQFUN-2 + REQFUN-3: Asignación y priorización ──────
+  solicitarTurno(paciente, conCita, servicio) {
+    const prioridad = paciente.getNivelPrioridad();
+    // Letra del turno según tipo de atención
+    const letra = servicio === 'Urgencias' ? 'C' : conCita ? 'A' : 'B';
+    const codigo = this.colaTurnos.generarCodigo(letra);
+    const turno  = new Turno(codigo, paciente, conCita ? 'CON_CITA' : 'SIN_CITA', prioridad, servicio);
+    this.colaTurnos.insertar(turno);
+    this._notificar('turno-agregado', turno);
+    return turno;
+  }
+
+  // ── REQFUN-5: Gestión de citas ───────────────────────────
+  agendarCita(paciente, fecha, hora, servicio) {
+    const cita = new Cita(++this.contCitas, paciente, fecha, hora, servicio);
+    this.citas.push(cita);
+    this._notificar('cita-agendada', cita);
+    return cita;
+  }
+
+  buscarCitasPaciente(numDoc) {
+    return this.citas.filter(c => c.paciente.numDoc === numDoc && c.estaVigente());
+  }
+
+  // ── REQFUN-7: Panel de atención — llamar siguiente turno ─
+  llamarSiguienteTurno() {
+    if (this.colaTurnos.estaVacia()) {
+      alert('No hay turnos en la cola de espera.');
+      return null;
+    }
+    const turno  = this.colaTurnos.extraer();
+    const modulo = this.modulos[this._moduloIdx % this.modulos.length];
+    this._moduloIdx++;
+    turno.llamar(modulo);
+    this.turnoActual = turno;
+    this.historial.push(turno);
+    this.totalAtendidos++;
+    this._notificar('turno-llamado', turno);
+    return turno;
+  }
+
+  getPosicionEnCola(turno) {
+    return this.colaTurnos.obtenerTodos().findIndex(t => t.codigo === turno.codigo) + 1;
+  }
+
+  getTiempoEsperaEstimado(posicion) { return posicion * 8; }
+
+  // ── Demo: agrega un turno aleatorio ─────────────────────
+  agregarTurnoDemo() {
+    const nombres   = ['Carlos','María','Pedro','Ana','Luis','Carmen','Jorge','Rosa','Diego','Sofía'];
+    const apellidos = ['García','Martínez','López','Rodríguez','Hernández','Gómez','Vargas'];
+    const servicios = ['Medicina General','Pediatría','Odontología','Laboratorio','Nutrición','Cardiología'];
+    const edades    = [3, 8, 22, 35, 45, 66, 72, 80];
+    const nombre    = nombres[Math.floor(Math.random() * nombres.length)];
+    const apellido  = apellidos[Math.floor(Math.random() * apellidos.length)];
+    const numDoc    = String(Math.floor(Math.random() * 90000000) + 10000000);
+    const edad      = edades[Math.floor(Math.random() * edades.length)];
+    const birthYear = new Date().getFullYear() - edad;
+    const servicio  = servicios[Math.floor(Math.random() * servicios.length)];
+    const p = this.registrarPaciente(nombre, apellido, 'CC', numDoc, `${birthYear}-06-15`, 'N/A', 'N/A');
+    const t = this.solicitarTurno(p, Math.random() > 0.5, servicio);
+    alert(`Turno demo agregado: ${t.codigo} — ${p.getNombreCompleto()} (${servicio})`);
+    return t;
+  }
+
+  resetear() {
+    if (!confirm('¿Reiniciar el sistema? Se perderán todos los turnos en cola.')) return;
+    this.colaTurnos       = new ColaTurnos();
+    this.turnoActual      = null;
+    this.historial        = [];
+    this.totalAtendidos   = 0;
+    this.contCitas        = 0;
+    this._moduloIdx       = 0;
+    this._notificar('reset', null);
+  }
+
+  // ── Datos iniciales de demostración ─────────────────────
+  _cargarDatosDemo() {
+    const p1 = this.registrarPaciente('Ana',     'Rodríguez', 'CC', '52345678',   '1958-03-15', '3101234567', 'ana.r@gmail.com');      // 66 años → prioridad alta
+    const p2 = this.registrarPaciente('Carlos',  'Mendoza',   'CC', '79234567',   '1990-07-22', '3201234567', 'carlos.m@gmail.com');    // 34 años → normal
+    const p3 = this.registrarPaciente('Sofía',   'Torres',    'CC', '1023456789', '2019-11-10', '3151234567', 'sofia.t@gmail.com');     // 4 años  → prioridad media
+    const p4 = this.registrarPaciente('Roberto', 'Gómez',     'CC', '12345678',   '1955-05-30', '3001234567', 'roberto.g@gmail.com');   // 68 años → prioridad alta
+    const p5 = this.registrarPaciente('Laura',   'Vargas',    'CC', '43567890',   '1995-08-14', '3051234567', 'laura.v@gmail.com', true); // embarazada → prioridad alta
+
+    this.solicitarTurno(p1, false, 'Medicina General');
+    this.solicitarTurno(p2, true,  'Odontología');
+    this.solicitarTurno(p3, false, 'Pediatría');
+    this.solicitarTurno(p4, false, 'Cardiología');
+    this.solicitarTurno(p5, true,  'Ginecología');
+
+    const tom = new Date(); tom.setDate(tom.getDate() + 1);
+    this.agendarCita(p2, tom.toISOString().split('T')[0], '10:30', 'Medicina General');
+  }
+}
+SistemaGestion._inst = null;
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: TaquillaUI
+   Controla la interfaz del kiosco de autoservicio.
+   Maneja la navegación entre pantallas y el flujo del usuario.
+───────────────────────────────────────────────────────────── */
+class TaquillaUI {
+  constructor(sistema) {
+    this.sistema             = sistema;
+    this.pantalla            = 'bienvenida';
+    this.pacienteActual      = null;
+    this.servicioSeleccionado = null;
+    this.fechaSeleccionada   = null;
+    this.horaSeleccionada    = null;
+    this.turnoActual         = null;
+    this.citaActual          = null;
+    this._tempDoc            = null;
+
+    // Mapa de pantalla → número de paso
+    this._pasos = {
+      bienvenida: 1, identificacion: 2, 'datos-nuevo': 2,
+      menu: 3, 'solicitar-turno': 3, 'agendar-cita': 3, 'consultar-cita': 3,
+      'resultado-turno': 4, 'resultado-cita': 4,
+    };
+
+    this._iniciarReloj();
+    this.render();
+  }
+
+  _iniciarReloj() {
+    const upd = () => {
+      const a = new Date();
+      const te = document.getElementById('kiosk-time');
+      const de = document.getElementById('kiosk-date');
+      if (te) te.textContent = a.toLocaleTimeString('es-CO');
+      if (de) de.textContent = a.toLocaleDateString('es-CO', { weekday:'short', day:'numeric', month:'short' });
+    };
+    upd(); setInterval(upd, 1000);
+  }
+
+  ir(pantalla) { this.pantalla = pantalla; this.render(); }
+
+  render() {
+    const body = document.getElementById('kiosk-body');
+    if (!body) return;
+
+    // Actualiza indicador de pasos
+    const paso = this._pasos[this.pantalla] || 1;
+    document.querySelectorAll('#step-bar .step-dot').forEach((d, i) => {
+      d.classList.remove('active','done');
+      if (i + 1 < paso) d.classList.add('done');
+      else if (i + 1 === paso) d.classList.add('active');
+    });
+
+    const renderFn = {
+      'bienvenida':      () => this._rBienvenida(),
+      'identificacion':  () => this._rIdentificacion(),
+      'datos-nuevo':     () => this._rDatosNuevo(),
+      'menu':            () => this._rMenu(),
+      'solicitar-turno': () => this._rSolicitarTurno(),
+      'agendar-cita':    () => this._rAgendarCita(),
+      'consultar-cita':  () => this._rConsultarCita(),
+      'resultado-turno': () => this._rResultadoTurno(),
+      'resultado-cita':  () => this._rResultadoCita(),
+    };
+
+    body.innerHTML = `<div class="fade-in">${(renderFn[this.pantalla] || renderFn['bienvenida'])()}</div>`;
+  }
+
+  // ── Bienvenida ────────────────────────────────────────────
+  _rBienvenida() {
+    return `
+      <div style="text-align:center;padding:10px 0;">
+        <div class="welcome-icon">🏥</div>
+        <div class="screen-title" style="text-align:center;font-size:1.3rem;">Bienvenido a EPS CAFAM</div>
+        <p style="color:var(--gray-600);font-size:.87rem;margin:8px 0 22px;line-height:1.5;">
+          Toque <strong>Iniciar</strong> para solicitar un turno o agendar una cita médica.<br>
+          Tenga su documento de identidad a la mano.
+        </p>
+        <div class="info-cards-grid">
+          <div class="info-card"><div class="ic-icon">🎫</div><div class="ic-label">Solicitar Turno</div></div>
+          <div class="info-card"><div class="ic-icon">📅</div><div class="ic-label">Agendar Cita</div></div>
+          <div class="info-card"><div class="ic-icon">🔍</div><div class="ic-label">Consultar Cita</div></div>
+          <div class="info-card"><div class="ic-icon">⏱️</div><div class="ic-label">Ver Tiempo Espera</div></div>
+        </div>
+        <div class="alert alert-info" style="text-align:left;">
+          <span>💡</span>
+          <span>Turnos preferenciales disponibles para adultos mayores, mujeres embarazadas y niños menores de 12 años.</span>
+        </div>
+        <button class="btn btn-primary" onclick="taquilla.ir('identificacion')">Iniciar Atención →</button>
+      </div>`;
+  }
+
+  // ── Identificación ────────────────────────────────────────
+  _rIdentificacion() {
+    return `
+      <button class="back-btn" onclick="taquilla.ir('bienvenida')">← Volver</button>
+      <div class="screen-title">Identificación</div>
+      <div class="screen-subtitle">Ingrese su número de documento para continuar</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo Doc.</label>
+          <select id="tipo-doc">
+            <option value="CC">CC</option><option value="TI">TI</option>
+            <option value="CE">CE</option><option value="PA">Pasaporte</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número de Documento</label>
+          <input type="text" id="num-doc" placeholder="Ej: 52345678" maxlength="12" inputmode="numeric" autofocus
+                 onkeypress="if(event.key==='Enter')taquilla.identificar()">
+        </div>
+      </div>
+      <div class="alert alert-info"><span>ℹ️</span><span>Para la demostración use: <strong>52345678</strong> (Ana, 65 años) · <strong>79234567</strong> (Carlos) · <strong>1023456789</strong> (Sofía, 4 años)</span></div>
+      <hr class="divider">
+      <button class="btn btn-primary" onclick="taquilla.identificar()">Consultar →</button>`;
+  }
+
+  identificar() {
+    const tipoDoc = document.getElementById('tipo-doc').value;
+    const numDoc  = document.getElementById('num-doc').value.trim();
+    if (!numDoc || numDoc.length < 5) { alert('Por favor ingrese un número de documento válido.'); return; }
+    const p = this.sistema.buscarPaciente(numDoc);
+    if (p) { this.pacienteActual = p; this.ir('menu'); }
+    else   { this._tempDoc = { tipo: tipoDoc, num: numDoc }; this.ir('datos-nuevo'); }
+  }
+
+  // ── Datos Nuevo Paciente ──────────────────────────────────
+  _rDatosNuevo() {
+    const hoy = new Date().toISOString().split('T')[0];
+    return `
+      <button class="back-btn" onclick="taquilla.ir('identificacion')">← Volver</button>
+      <div class="screen-title">Nuevo Afiliado</div>
+      <div class="screen-subtitle">Complete sus datos para registrarse</div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Nombres</label><input type="text" id="inp-nom" placeholder="Nombres"></div>
+        <div class="form-group"><label>Apellidos</label><input type="text" id="inp-ape" placeholder="Apellidos"></div>
+      </div>
+      <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="inp-fec" max="${hoy}"></div>
+      <div class="form-row-2">
+        <div class="form-group"><label>Teléfono</label><input type="tel" id="inp-tel" placeholder="300 000 0000"></div>
+        <div class="form-group"><label>Correo</label><input type="email" id="inp-cor" placeholder="correo@email.com"></div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:.9rem;">
+          <input type="checkbox" id="inp-emb" style="width:17px;height:17px;">
+          ¿Está en estado de embarazo?
+        </label>
+      </div>
+      <hr class="divider">
+      <button class="btn btn-primary" onclick="taquilla.registrarNuevo()">Registrar y Continuar →</button>`;
+  }
+
+  registrarNuevo() {
+    const nom = document.getElementById('inp-nom').value.trim();
+    const ape = document.getElementById('inp-ape').value.trim();
+    const fec = document.getElementById('inp-fec').value;
+    if (!nom || !ape || !fec) { alert('Por favor complete nombre, apellido y fecha de nacimiento.'); return; }
+    this.pacienteActual = this.sistema.registrarPaciente(
+      nom, ape, this._tempDoc.tipo, this._tempDoc.num, fec,
+      document.getElementById('inp-tel').value || 'N/A',
+      document.getElementById('inp-cor').value || 'N/A',
+      document.getElementById('inp-emb').checked
+    );
+    this.ir('menu');
+  }
+
+  // ── Menú Principal ────────────────────────────────────────
+  _rMenu() {
+    const p        = this.pacienteActual;
+    const prioInfo = p.getPrioridadInfo();
+    const citas    = this.sistema.buscarCitasPaciente(p.numDoc);
+    return `
+      <div class="patient-card">
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div class="patient-avatar">${p.getIniciales()}</div>
+          <div style="flex:1;">
+            <div class="patient-name">${p.getNombreCompleto()}</div>
+            <div class="patient-doc">${p.tipoDoc}: ${p.numDoc}</div>
+            <div class="patient-detail">Edad: ${p.calcularEdad()} años &nbsp;·&nbsp; EPS: ${p.eps}</div>
+          </div>
+          <span class="priority-badge ${prioInfo.clase}">${prioInfo.texto}</span>
+        </div>
+        ${citas.length ? `<div class="alert alert-success" style="margin:10px 0 0;"><span>📅</span><span>Tiene <strong>${citas.length}</strong> cita(s) programada(s).</span></div>` : ''}
+      </div>
+      <div class="screen-title">¿Qué desea hacer?</div>
+      <div class="screen-subtitle" style="margin-bottom:16px;">Seleccione una opción</div>
+      <div class="menu-options">
+        <div class="menu-option" onclick="taquilla.ir('solicitar-turno')">
+          <div class="opt-icon blue">🎫</div>
+          <div class="opt-text"><h3>Solicitar Turno</h3><p>Obtenga un turno para atención el día de hoy</p></div>
+          <span style="color:var(--gray-400);">›</span>
+        </div>
+        <div class="menu-option" onclick="taquilla.ir('agendar-cita')">
+          <div class="opt-icon green">📅</div>
+          <div class="opt-text"><h3>Agendar Cita Médica</h3><p>Programe una cita para una fecha futura</p></div>
+          <span style="color:var(--gray-400);">›</span>
+        </div>
+        ${citas.length ? `
+        <div class="menu-option" onclick="taquilla.ir('consultar-cita')">
+          <div class="opt-icon amber">🔍</div>
+          <div class="opt-text"><h3>Consultar Mis Citas</h3><p>${citas.length} cita(s) vigente(s)</p></div>
+          <span style="color:var(--gray-400);">›</span>
+        </div>` : ''}
+      </div>
+      <hr class="divider">
+      <button class="btn btn-outline btn-sm" onclick="taquilla._salir()">Finalizar sesión</button>`;
+  }
+
+  _salir() {
+    this.pacienteActual = this.servicioSeleccionado = this.fechaSeleccionada = this.horaSeleccionada = null;
+    this.turnoActual = this.citaActual = null;
+    this.ir('bienvenida');
+  }
+
+  // ── Solicitar Turno ───────────────────────────────────────
+  _rSolicitarTurno() {
+    const servicios = [
+      { n:'Medicina General', i:'👨‍⚕️', e:'~15 min' }, { n:'Pediatría', i:'👶', e:'~20 min' },
+      { n:'Odontología', i:'🦷', e:'~25 min' },         { n:'Laboratorio', i:'🧪', e:'~10 min' },
+      { n:'Nutrición', i:'🥗', e:'~12 min' },            { n:'Ginecología', i:'🏥', e:'~30 min' },
+      { n:'Cardiología', i:'❤️', e:'~35 min' },          { n:'Psicología', i:'🧠', e:'~40 min' },
+      { n:'Urgencias', i:'🚨', e:'Inmediato' },           { n:'Radiología', i:'🔬', e:'~20 min' },
+    ];
+    const tieneCita = this.sistema.buscarCitasPaciente(this.pacienteActual.numDoc).length > 0;
+    return `
+      <button class="back-btn" onclick="taquilla.ir('menu')">← Volver</button>
+      <div class="screen-title">Solicitar Turno</div>
+      <div class="screen-subtitle">Seleccione el servicio que necesita</div>
+      ${tieneCita
+        ? `<div class="alert alert-success"><span>📅</span><span>Tiene cita programada. Se le asignará turno preferencial <strong>(letra A)</strong>.</span></div>`
+        : `<div class="alert alert-info"><span>ℹ️</span><span>Atención sin cita. Se le asignará turno de espera <strong>(letra B)</strong>.</span></div>`}
+      <div class="service-grid">
+        ${servicios.map(s => `
+          <div class="service-btn" onclick="taquilla._selServicio('${s.n}', this)">
+            <div class="svc-icon">${s.i}</div>
+            <div class="svc-name">${s.n}</div>
+            <div class="svc-wait">${s.e}</div>
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-primary" id="btn-conf-turno" onclick="taquilla.confirmarTurno()" disabled>Confirmar Turno →</button>`;
+  }
+
+  _selServicio(nombre, el) {
+    document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    this.servicioSeleccionado = nombre;
+    const btn = document.getElementById('btn-conf-turno');
+    if (btn) btn.disabled = false;
+  }
+
+  confirmarTurno() {
+    if (!this.servicioSeleccionado) return;
+    const tieneCita = this.sistema.buscarCitasPaciente(this.pacienteActual.numDoc).length > 0;
+    this.turnoActual = this.sistema.solicitarTurno(this.pacienteActual, tieneCita, this.servicioSeleccionado);
+    pantallaEspera.actualizar(); // ← SINCRONIZACIÓN EN TIEMPO REAL CON LA TV
+    this.ir('resultado-turno');
+  }
+
+  // ── Resultado Turno ───────────────────────────────────────
+  _rResultadoTurno() {
+    const t = this.turnoActual;
+    if (!t) return this._rMenu();
+    const pos     = this.sistema.getPosicionEnCola(t);
+    const espera  = this.sistema.getTiempoEsperaEstimado(pos);
+    const pInfo   = t.getPrioridadInfo();
+    return `
+      <div class="screen-title">🎫 Tu Turno</div>
+      <div class="screen-subtitle">¡Turno asignado exitosamente!</div>
+      <div class="ticket">
+        <div class="ticket-label">Número de Turno</div>
+        <div class="ticket-number">${t.codigo}</div>
+        <div class="ticket-service">${t.servicio}</div>
+        <div class="ticket-details">
+          <div class="td-item"><div class="td-label">Posición</div><div class="td-value">#${pos}</div></div>
+          <div class="td-item"><div class="td-label">Espera aprox.</div><div class="td-value">${espera} min</div></div>
+          <div class="td-item"><div class="td-label">Tipo</div><div class="td-value">${t.tipo === 'CON_CITA' ? 'Con cita' : 'Sin cita'}</div></div>
+        </div>
+      </div>
+      <div class="alert alert-success"><span>✅</span><div><strong>Turno registrado.</strong><br><small>Esté atento a la pantalla en la sala de espera. Le llamaremos cuando sea su turno.</small></div></div>
+      <div class="alert ${pInfo.clase === 'priority-alta' ? 'alert-warning' : 'alert-info'}">
+        <span>${pInfo.emoji}</span><span>Su turno tiene prioridad <strong>${pInfo.texto.replace(/[🔴🟡🔵] /, '')}</strong></span>
+      </div>
+      <button class="btn btn-secondary" onclick="taquilla._salir()">Finalizar y Esperar</button>
+      <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="taquilla.ir('menu')">Otra solicitud</button>`;
+  }
+
+  // ── Agendar Cita ──────────────────────────────────────────
+  _rAgendarCita() {
+    const espec = ['Medicina General','Pediatría','Ginecología','Cardiología','Odontología','Psicología','Nutrición','Radiología'];
+    const dias  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    // Próximos 8 días hábiles (sin domingo)
+    const fechas = [];
+    let d = new Date(); d.setDate(d.getDate() + 1);
+    while (fechas.length < 8) {
+      if (d.getDay() !== 0) fechas.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    }
+    const horas    = ['07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','14:00','14:30','15:00','15:30','16:00','16:30'];
+    const ocupados = ['08:00','10:00','14:30'];
+    return `
+      <button class="back-btn" onclick="taquilla.ir('menu')">← Volver</button>
+      <div class="screen-title">Agendar Cita Médica</div>
+      <div class="screen-subtitle">Seleccione especialidad, fecha y hora disponible</div>
+      <div class="form-group">
+        <label>Especialidad / Servicio</label>
+        <select id="esp-sel" onchange="taquilla.servicioSeleccionado=this.value;taquilla._checkCita()">
+          <option value="">-- Seleccione especialidad --</option>
+          ${espec.map(e => `<option value="${e}">${e}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha Disponible</label>
+        <div class="date-grid">
+          ${fechas.map(f => `
+            <div class="date-btn" onclick="taquilla._selFecha('${f.toISOString().split('T')[0]}', this)">
+              <div class="db-day">${dias[f.getDay()]}</div>
+              <div class="db-num">${f.getDate()}</div>
+              <div class="db-month">${meses[f.getMonth()]}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Hora Disponible</label>
+        <div class="time-grid">
+          ${horas.map(h => `
+            <div class="time-btn ${ocupados.includes(h) ? 'occupied' : ''}"
+                 onclick="${ocupados.includes(h) ? '' : `taquilla._selHora('${h}', this)`}">
+              ${h}${ocupados.includes(h) ? '<br><small style="font-size:.65rem;">Ocupado</small>' : ''}
+            </div>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn-secondary" id="btn-conf-cita" onclick="taquilla.confirmarCita()" disabled>Confirmar Cita →</button>`;
+  }
+
+  _selFecha(f, el) { document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); this.fechaSeleccionada = f; this._checkCita(); }
+  _selHora(h, el)  { document.querySelectorAll('.time-btn:not(.occupied)').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); this.horaSeleccionada = h; this._checkCita(); }
+  _checkCita() {
+    const esp = document.getElementById('esp-sel'); if (esp) this.servicioSeleccionado = esp.value;
+    const btn = document.getElementById('btn-conf-cita');
+    if (btn) btn.disabled = !(this.servicioSeleccionado && this.fechaSeleccionada && this.horaSeleccionada);
+  }
+
+  confirmarCita() {
+    const esp = document.getElementById('esp-sel'); if (esp) this.servicioSeleccionado = esp.value;
+    if (!this.servicioSeleccionado || !this.fechaSeleccionada || !this.horaSeleccionada) { alert('Seleccione especialidad, fecha y hora.'); return; }
+    this.citaActual = this.sistema.agendarCita(this.pacienteActual, this.fechaSeleccionada, this.horaSeleccionada, this.servicioSeleccionado);
+    pantallaEspera.actualizar(); // ← SINCRONIZACIÓN CON TV
+    this.ir('resultado-cita');
+  }
+
+  // ── Resultado Cita ────────────────────────────────────────
+  _rResultadoCita() {
+    const c = this.citaActual; if (!c) return this._rMenu();
+    const d   = new Date(c.fecha + 'T12:00:00');
+    const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const mes  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return `
+      <div class="screen-title">📅 Cita Confirmada</div>
+      <div class="screen-subtitle">Su cita ha sido agendada exitosamente</div>
+      <div class="ticket" style="background:linear-gradient(135deg,var(--green-dark),var(--green-main));">
+        <div class="ticket-label">Número de Cita</div>
+        <div class="ticket-number" style="font-size:3rem;color:white;">#${String(c.id).padStart(4,'0')}</div>
+        <div class="ticket-service">${c.servicio}</div>
+        <div class="ticket-details">
+          <div class="td-item"><div class="td-label">Fecha</div><div class="td-value" style="font-size:.78rem;">${dias[d.getDay()]} ${d.getDate()} de ${mes[d.getMonth()]}</div></div>
+          <div class="td-item"><div class="td-label">Hora</div><div class="td-value">${c.hora}</div></div>
+        </div>
+      </div>
+      <div class="alert alert-success"><span>✅</span><div><strong>Cita agendada.</strong><br><small>Llegue 15 minutos antes. Traiga su documento de identidad original.</small></div></div>
+      <div class="alert alert-warning"><span>⚠️</span><span>El día de su cita, regrese a esta taquilla para recibir su número de turno.</span></div>
+      <button class="btn btn-secondary" onclick="taquilla._salir()">Finalizar</button>
+      <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="taquilla.ir('menu')">Otra solicitud</button>`;
+  }
+
+  // ── Consultar Citas ───────────────────────────────────────
+  _rConsultarCita() {
+    const citas = this.sistema.buscarCitasPaciente(this.pacienteActual.numDoc);
+    return `
+      <button class="back-btn" onclick="taquilla.ir('menu')">← Volver</button>
+      <div class="screen-title">Mis Citas Programadas</div>
+      <div class="screen-subtitle">Citas vigentes en el sistema</div>
+      ${citas.length === 0
+        ? `<div class="alert alert-info"><span>📅</span><span>No tiene citas programadas. ¿Desea agendar una?</span></div>
+           <button class="btn btn-secondary" onclick="taquilla.ir('agendar-cita')">Agendar Cita →</button>`
+        : citas.map(c => `
+            <div class="patient-card" style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div class="patient-name">📋 ${c.servicio}</div>
+                  <div class="patient-doc">${c.getFechaFormateada()}</div>
+                  <div class="patient-detail">Hora: <strong>${c.hora}</strong></div>
+                </div>
+                <span class="priority-badge priority-normal">${c.estado}</span>
+              </div>
+            </div>`).join('')}
+      <hr class="divider">
+      <button class="btn btn-outline btn-sm" onclick="taquilla.ir('menu')">Volver al Menú</button>`;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: PantallaEsperaUI
+   Controla la pantalla de TV de la sala de espera.
+   Se sincroniza automáticamente con SistemaGestion vía Observer.
+───────────────────────────────────────────────────────────── */
+class PantallaEsperaUI {
+  constructor(sistema) {
+    this.sistema = sistema;
+    // Suscripción al patrón Observer del sistema
+    this.sistema.suscribir((evt, datos) => {
+      this.actualizar();
+      if (evt === 'turno-llamado' && datos) this._flashTurno();
+    });
+    this._iniciarReloj();
+    this.actualizar();
+  }
+
+  _iniciarReloj() {
+    const upd = () => {
+      const a = new Date();
+      const te = document.getElementById('tv-time');
+      const de = document.getElementById('tv-date');
+      if (te) te.textContent = a.toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
+      if (de) de.textContent = a.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'long' });
+    };
+    upd(); setInterval(upd, 1000);
+  }
+
+  /** Actualiza todos los componentes de la pantalla TV. */
+  actualizar() {
+    this._renderTurnoActual();
+    this._renderCola();
+    this._renderEstadisticas();
+  }
+
+  _renderTurnoActual() {
+    const t   = this.sistema.turnoActual;
+    const numEl = document.getElementById('tv-turn-num');
+    const svcEl = document.getElementById('tv-turn-svc');
+    const modEl = document.getElementById('tv-turn-mod');
+    const priEl = document.getElementById('tv-turn-prio');
+    if (!numEl) return;
+    if (t) {
+      numEl.textContent = t.codigo;
+      svcEl.textContent = t.servicio;
+      modEl.textContent = t.modulo || 'Dirigirse al módulo indicado';
+      const pi = t.getPrioridadInfo();
+      priEl.innerHTML   = `<span class="priority-badge ${pi.clase}">${pi.texto}</span>`;
+    } else {
+      numEl.textContent = '---';
+      svcEl.textContent = 'En espera de llamado...';
+      modEl.textContent = 'Por favor espere su turno';
+      priEl.innerHTML   = '';
+    }
+  }
+
+  _renderCola() {
+    const lista  = document.getElementById('tv-queue-list');
+    const badge  = document.getElementById('q-count');
+    if (!lista) return;
+    const turnos = this.sistema.colaTurnos.obtenerTodos();
+    if (badge) badge.textContent = turnos.length;
+    if (turnos.length === 0) {
+      lista.innerHTML = `<div class="tv-queue-empty"><div class="ei">✅</div><div>Sin turnos en espera</div></div>`;
+      return;
+    }
+    lista.innerHTML = turnos.slice(0, 9).map((t, idx) => {
+      const pi = t.getPrioridadInfo();
+      return `
+        <div class="queue-item ${idx === 0 ? 'is-next' : ''}">
+          <div class="qi-turn ${t.getLetra() === 'C' ? 'emerg' : ''}">${t.codigo}</div>
+          <div class="qi-info">
+            <div class="qi-name">${t.paciente.getNombreCompleto()}</div>
+            <div class="qi-svc">${t.servicio} &nbsp;·&nbsp; ${t.getIcono()} ${t.tipo === 'CON_CITA' ? 'Con cita' : 'Sin cita'}</div>
+          </div>
+          <span title="${pi.texto}">${pi.emoji}</span>
+        </div>`;
+    }).join('');
+    if (turnos.length > 9) lista.innerHTML += `<div style="text-align:center;color:rgba(255,255,255,.25);font-size:.72rem;padding:8px;">+${turnos.length - 9} más en cola</div>`;
+  }
+
+  _renderEstadisticas() {
+    const get = id => document.getElementById(id);
+    if (get('s-cola'))      get('s-cola').textContent      = this.sistema.colaTurnos.getTamano();
+    if (get('s-atendidos')) get('s-atendidos').textContent = this.sistema.totalAtendidos;
+    if (get('s-citas'))     get('s-citas').textContent     = this.sistema.citas.length;
+  }
+
+  _flashTurno() {
+    const box = document.getElementById('tv-current-box');
+    if (box) { box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); }
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   CLASE: App
+   Orquestador principal. Controla el modo de vista activo.
+───────────────────────────────────────────────────────────── */
+class App {
+  constructor() { this.modo = 'kiosk'; }
+
+  setModo(modo) {
+    this.modo = modo;
+    const kioskEl = document.getElementById('kiosk-view');
+    const tvEl    = document.getElementById('tv-view');
+    const adminEl = document.getElementById('admin-bar');
+
+    // Mostrar u ocultar vistas
+    kioskEl.style.display = (modo === 'kiosk') ? 'flex' : 'none';
+    tvEl.classList.toggle('show', modo === 'tv' || modo === 'admin');
+    adminEl.classList.toggle('show', modo === 'admin');
+
+    // Actualizar botones de modo
+    ['kiosk','tv','admin'].forEach(m => {
+      document.getElementById(`btn-${m}`).classList.toggle('active', m === modo);
+    });
+
+    if (modo === 'tv' || modo === 'admin') pantallaEspera.actualizar();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INICIALIZACIÓN DEL SISTEMA
+   Se crean las instancias de todas las clases en orden correcto.
+══════════════════════════════════════════════════════════════ */
+const sistema       = new SistemaGestion();   // Singleton con datos demo
+const taquilla      = new TaquillaUI(sistema); // UI del kiosco
+const pantallaEspera = new PantallaEsperaUI(sistema); // UI de la TV
+const app           = new App();               // Orquestador de modos
+
+// Función global para los botones de la barra de modo
+function setMode(modo) { app.setModo(modo); }
+
+// Iniciar en modo Taquilla
+app.setModo('kiosk');
+
+console.log('✅ EPS CAFAM — Sistema de Turnos iniciado correctamente.');
+console.log('📦 Clases: Paciente | Cita | Turno | ColaTurnos | SistemaGestion | TaquillaUI | PantallaEsperaUI | App');
+console.log('👥 Pacientes en sistema:', sistema.pacientes.size);
+console.log('🎫 Turnos en cola:', sistema.colaTurnos.getTamano());
+</script>
+</body>
+</html>
